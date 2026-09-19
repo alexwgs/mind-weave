@@ -8,9 +8,11 @@ import com.salary.community.entity.ChatMessage;
 import com.salary.community.entity.ChatRoom;
 import com.salary.community.entity.GuestbookEntry;
 import com.salary.community.service.CommunityService;
+import com.salary.community.realtime.Viewer;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.List;
 import java.util.Map;
@@ -35,6 +37,36 @@ public class CommunityController {
     public Result<ChatMessage> postMessage(@PathVariable Long roomId, @RequestBody PublicPostRequest body,
                                            HttpServletRequest request) {
         return Result.ok(service.postMessage(roomId, body, request));
+    }
+
+    // ---------- 会客厅实时能力（SSE 推送 + 在线列表） ----------
+
+    /**
+     * 订阅房间实时事件。浏览器 EventSource 无法自定义请求头，
+     * 因此成员身份在连接建立时同步解析（JWT 由过滤器从 Authorization 头读取），
+     * 异步阶段不再访问 SecurityContext。
+     */
+    @GetMapping("/public/rooms/{roomId}/stream")
+    public SseEmitter stream(@PathVariable Long roomId,
+                             @RequestParam String viewerId,
+                             @RequestParam(required = false) String nickname) {
+        return service.stream(roomId, viewerId, nickname);
+    }
+
+    @PostMapping("/public/rooms/{roomId}/presence")
+    public Result<List<Viewer>> presence(@PathVariable Long roomId, @RequestBody Map<String, String> body) {
+        return Result.ok(service.joinRoom(roomId, body.get("viewerId"), body.get("name")));
+    }
+    @PostMapping("/public/rooms/{roomId}/presence/leave")
+    public Result<Void> leave(@PathVariable Long roomId, @RequestBody Map<String, String> body) {
+        service.leaveRoom(roomId, body.get("viewerId"));
+        return Result.ok();
+    }
+
+    @PostMapping("/public/rooms/{roomId}/typing")
+    public Result<Void> typing(@PathVariable Long roomId, @RequestBody Map<String, String> body) {
+        service.typing(roomId, body.get("viewerId"));
+        return Result.ok();
     }
 
     @GetMapping("/public/guestbook")

@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Avatar, Button, Input, Tag, TextArea } from '@douyinfe/semi-ui'
-import { IconArrowRight, IconComment, IconMail, IconSend } from '@douyinfe/semi-icons'
+import { IconArrowRight, IconComment, IconMail, IconSend, IconUserGroup } from '@douyinfe/semi-icons'
 import dayjs from 'dayjs'
 
 /** 相对时间：会客厅是当下的对话，用"几分钟前"比时间戳更贴合语境 */
@@ -16,6 +16,73 @@ export function relativeTime(value) {
   const days = dayjs().diff(then, 'day')
   if (days < 7) return `${days} 天前`
   return then.format('YYYY-MM-DD')
+}
+
+/** 气泡内的时间：今天的会话只显示时分，更早的补上日期 */
+export function bubbleTime(value) {
+  if (!value) return ''
+  const then = dayjs(value)
+  if (!then.isValid()) return ''
+  return then.isSame(dayjs(), 'day') ? then.format('HH:mm') : then.format('MM-DD HH:mm')
+}
+
+function dayLabel(value) {
+  const then = dayjs(value)
+  if (!then.isValid()) return ''
+  if (then.isSame(dayjs(), 'day')) return '今天'
+  if (then.isSame(dayjs().subtract(1, 'day'), 'day')) return '昨天'
+  return then.format('YYYY 年 M 月 D 日')
+}
+
+/** 头像底色：按昵称散列取一个稳定的浅色，不依赖后端字段 */
+const AVATAR_TONES = ['avatar-tone-a', 'avatar-tone-b', 'avatar-tone-c', 'avatar-tone-d']
+function avatarTone(name) {
+  const text = name || ''
+  let sum = 0
+  for (let i = 0; i < text.length; i += 1) sum = (sum + text.charCodeAt(i)) % 997
+  return AVATAR_TONES[sum % AVATAR_TONES.length]
+}
+
+const GROUP_GAP_MINUTES = 5
+
+/**
+ * 把线性消息整理成 IM 对话流：
+ * 连续的同一作者（5 分钟内）合并成一组，只显示一次头像与昵称；
+ * 跨天插入日期分割线。
+ */
+export function groupMessages(messages, viewer) {
+  const blocks = []
+  let last = null
+  for (const message of messages || []) {
+    const isOwn = !!viewer && message.authorName === viewer
+    const moment = dayjs(message.createdAt)
+    const startsNewDay = !last || !moment.isSame(dayjs(last.createdAt), 'day')
+    if (startsNewDay) blocks.push({ kind: 'day', key: `day-${message.id}`, label: dayLabel(message.createdAt) })
+
+    const sameAuthor = last
+      && !startsNewDay
+      && last.authorName === message.authorName
+      && last.isOwn === isOwn
+      && moment.diff(dayjs(last.createdAt), 'minute') < GROUP_GAP_MINUTES
+
+    if (sameAuthor) {
+      last.items.push(message)
+      last.createdAt = message.createdAt
+    } else {
+      const group = {
+        kind: 'group',
+        key: `group-${message.id}`,
+        authorName: message.authorName,
+        authorType: message.authorType,
+        isOwn,
+        createdAt: message.createdAt,
+        items: [message]
+      }
+      blocks.push(group)
+      last = group
+    }
+  }
+  return blocks
 }
 
 export function BrandGlyph() {
@@ -59,7 +126,62 @@ export function CommunityTopbar({ active, isLoggedIn }) {
   )
 }
 
-/** 一条公开内容，会客厅与留言板共用，差异只在皮肤与时间写法 */
+/** 在线成员列表（数据来自 SSE 帧，不需要单独轮询） */
+export function ViewerList({ viewers, selfId }) {
+  if (!viewers.length) {
+    return <p className="community-rail-empty">房间里暂时只有你。其他人进入后会出现在这里。</p>
+  }
+  return (
+    <ul className="community-viewers">
+      {viewers.map((viewer) => (
+        <li key={viewer.id} className={viewer.id === selfId ? 'is-self' : ''}>
+          <Avatar size="extra-small" className={avatarTone(viewer.name)}>{(viewer.name || '访').slice(0, 1)}</Avatar>
+          <span className="community-viewer-name">
+            {viewer.name}
+            {viewer.id === selfId && <small>（我）</small>}
+          </span>
+          <i aria-hidden="true" />
+          {!viewer.guest && <Tag size="small" color="green">成员</Tag>}
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+/** IM 风格的对话流：自己的消息右对齐，连续发言合并气泡 */
+export function ChatStream({ messages, viewer, typing, emptyHint }) {
+  const blocks = groupMessages(messages, viewer)
+  return (
+    <div className="community-chat">
+      {!blocks.length && <div className="community-empty"><h3>{emptyHint?.title || '这个房间还很安静'}</h3><p>{emptyHint?.hint || '说第一句话，把这里点亮。'}</p></div>}
+      {blocks.map((block) => block.kind === 'day'
+        ? <div className="community-day" key={block.key}><span>{block.label}</span></div>
+        : (
+          <div className={`community-msg${block.isOwn ? ' is-own' : ''}`} key={block.key}>
+            {!block.isOwn && (
+              <Avatar size="small" className={avatarTone(block.authorName)}>{(block.authorName || '访').slice(0, 1)}</Avatar>
+            )}
+            <div className="community-msg-body">
+              <div className="community-msg-head">
+                <strong>{block.authorName}</strong>
+                {block.authorType === 'USER' && <Tag size="small" color="green">成员</Tag>}
+                <time>{bubbleTime(block.createdAt)}</time>
+              </div>
+              {block.items.map((item) => <p className="community-bubble" key={item.id}>{item.content}</p>)}
+            </div>
+          </div>
+        ))}
+      {typing.length > 0 && (
+        <div className="community-typing" aria-live="polite">
+          <span className="community-typing-dots" aria-hidden="true"><i /><i /><i /></span>
+          {typing.length === 1 ? `${typing[0]} 正在输入…` : `${typing.slice(0, 2).join('、')} 正在输入…`}
+        </div>
+      )}
+    </div>
+  )
+}
+
+/** 一条公开内容，留言板与文章评论共用 */
 export function Post({ item, variant = 'chat', mine = false, pending = false }) {
   const isGuestbook = variant === 'guestbook'
   return (
@@ -83,11 +205,16 @@ export function Post({ item, variant = 'chat', mine = false, pending = false }) 
 
 /** 发言区：会客厅即时公开，留言板先审后发 */
 export function Composer({
-  value, onChange, nickname, onNicknameChange, user, sending, onSend,
-  maxLength, placeholder, reviewNote, actionLabel = '提交', sticky = false
+  value, onChange, nickname, onNicknameChange, user, sending, onSend, onTyping,
+  maxLength, placeholder, reviewNote, actionLabel = '提交', sticky = false, disabled = false
 }) {
   const isLoggedIn = !!user
   const displayName = user?.displayName || user?.username || (nickname || '').trim()
+  const submitOnEnter = (event) => {
+    if (event.key !== 'Enter' || event.shiftKey) return
+    event.preventDefault()
+    onSend()
+  }
   return (
     <div className={`community-composer${sticky ? ' is-sticky' : ''}`}>
       <div className="community-identity">
@@ -98,15 +225,17 @@ export function Composer({
       </div>
       <TextArea
         value={value}
-        onChange={onChange}
+        onChange={(next) => { onChange(next); onTyping?.() }}
+        onKeyDown={submitOnEnter}
         maxCount={maxLength}
         autosize={{ minRows: 2, maxRows: 6 }}
         placeholder={placeholder}
+        disabled={disabled}
         aria-label="发言内容"
       />
       <div className="community-compose-foot">
         <span>{reviewNote}</span>
-        <Button theme="solid" type="primary" loading={sending} icon={<IconSend />} onClick={onSend}>{actionLabel}</Button>
+        <Button theme="solid" type="primary" loading={sending} disabled={disabled} icon={<IconSend />} onClick={onSend}>{actionLabel}</Button>
       </div>
     </div>
   )

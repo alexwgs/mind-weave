@@ -58,9 +58,10 @@
 .community-hero-card p { font-size: 11px; line-height: 1.9; color: var(--app-muted); margin: 0; }
 .community-hero-card .community-hero-spark { position: absolute; top: -12px; right: -8px; color: var(--app-accent); font-size: 22px; }
 
-/* ---------- 主体三栏 / 两栏 ---------- */
+/* ---------- 主体三栏 / 四栏 ---------- */
 .community-main { display: grid; align-items: start; gap: 22px; }
-.community-main.is-chat { grid-template-columns: 214px minmax(0, 1fr) 236px; }
+.community-main.is-chat { grid-template-columns: 200px minmax(0, 1fr) 258px; }
+.community-main.is-chat .community-rail { display: flex; flex-direction: column; gap: 22px; }
 .community-main.is-guestbook { grid-template-columns: minmax(0, 1fr) 268px; max-width: 1040px; margin: 0 auto; }
 .community-col { display: flex; flex-direction: column; gap: 22px; min-width: 0; }
 
@@ -88,6 +89,49 @@
 .community-board { display: flex; flex-direction: column; }
 .community-stream { display: flex; flex-direction: column; gap: 12px; flex: 1 1 auto; max-height: min(56vh, 560px); min-height: 180px; overflow-y: auto; padding: 2px 4px 2px 2px; scrollbar-color: #ccd2de transparent; }
 .community-stream .semi-spin { display: block; margin: 90px auto; }
+/* 会客厅的可视区域本身不滚动，交给内部 ChatStream 滚动，配合输入区贴底 */
+.community-chat-scroll { overflow: visible; }
+
+/* ---------- IM 对话流 ---------- */
+.community-chat { display: flex; flex-direction: column; gap: 14px; }
+/* 面板是纵向 flex，用 margin-top:auto 把输入区压到底部（比 sticky 更稳，不会和滚动容器打架） */
+.community-board .community-composer { margin-top: auto; }
+.community-day { display: flex; justify-content: center; margin: 6px 0 2px; }
+.community-day span { font-size: 10.5px; color: var(--app-muted); background: var(--app-bg); padding: 4px 12px; border-radius: 999px; }
+
+.community-msg { display: flex; align-items: flex-start; gap: 10px; max-width: 82%; }
+.community-msg.is-own { flex-direction: row-reverse; margin-left: auto; }
+.community-msg-body { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.community-msg.is-own .community-msg-body { align-items: flex-end; }
+.community-msg-head { display: flex; align-items: center; gap: 7px; padding: 0 4px; }
+.community-msg-head strong { font-size: 12px; font-weight: 500; color: var(--app-ink); }
+.community-msg-head time { font-size: 10px; color: var(--app-muted); }
+.community-msg.is-own .community-msg-head { flex-direction: row-reverse; }
+
+.community-bubble { margin: 0; padding: 10px 14px; font-size: 13px; line-height: 1.8; white-space: pre-wrap; overflow-wrap: anywhere; background: var(--app-surface); border: 1px solid var(--app-border); border-radius: 4px 14px 14px 14px; box-shadow: var(--app-shadow); }
+.community-msg.is-own .community-bubble { background: var(--app-primary); border-color: transparent; color: #fff; border-radius: 14px 4px 14px 14px; }
+.community-msg .community-bubble + .community-bubble { margin-top: -2px; }
+
+.community-typing { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--app-muted); padding: 2px 6px; }
+.community-typing-dots { display: inline-flex; gap: 3px; }
+.community-typing-dots i { width: 4px; height: 4px; border-radius: 50%; background: var(--app-primary); opacity: .35; animation: community-typing 1.2s infinite; }
+.community-typing-dots i:nth-child(2) { animation-delay: .18s; }
+.community-typing-dots i:nth-child(3) { animation-delay: .36s; }
+@keyframes community-typing { 0%, 60%, 100% { opacity: .28; transform: translateY(0); } 30% { opacity: 1; transform: translateY(-2px); } }
+
+/* ---------- 在线成员 ---------- */
+.community-viewers { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 3px; }
+.community-viewers li { display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-radius: 10px; font-size: 12px; }
+.community-viewers li.is-self { background: var(--app-lilac); }
+.community-viewer-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.community-viewer-name small { color: var(--app-muted); font-size: 10px; }
+.community-viewers li > i { width: 6px; height: 6px; border-radius: 50%; background: #43ab7f; box-shadow: 0 0 0 3px #43ab7f1f; flex-shrink: 0; }
+.community-viewers .semi-avatar { flex-shrink: 0; font-size: 11px; }
+.avatar-tone-a { background: var(--app-lilac); color: #6a58c4; }
+.avatar-tone-b { background: var(--app-mint); color: #4a8069; }
+.avatar-tone-c { background: var(--app-peach); color: #b4705a; }
+.avatar-tone-d { background: #e4ecf7; color: #55708f; }
+
 .community-post { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 12px; padding: 14px 16px; border-radius: 14px; background: var(--app-bg); border: 1px solid transparent; }
 .community-post:hover { border-color: var(--app-border); }
 .community-post.is-mine { background: var(--app-lilac); border-color: #6554d92e; }

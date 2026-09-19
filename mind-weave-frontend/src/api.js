@@ -157,6 +157,10 @@ export const communityApi = {
   rooms: () => http.get('/community/public/rooms'),
   messages: (roomId, params) => http.get(`/community/public/rooms/${roomId}/messages`, { params }),
   postMessage: (roomId, data) => http.post(`/community/public/rooms/${roomId}/messages`, { ...data, visitorToken: visitorToken() }),
+  // 实时能力：EventSource 无法自定义请求头，所以流地址在 realtime.js 里单独拼装
+  presence: (roomId, data) => http.post(`/community/public/rooms/${roomId}/presence`, { ...data, visitorToken: visitorToken() }),
+  leaveRoom: (roomId, data) => http.post(`/community/public/rooms/${roomId}/presence/leave`, data),
+  typing: (roomId, data) => http.post(`/community/public/rooms/${roomId}/typing`, data),
   guestbook: (params) => http.get('/community/public/guestbook', { params }),
   postGuestbook: (data) => http.post('/community/public/guestbook', { ...data, visitorToken: visitorToken() }),
   articleComments: (articleId, params) => http.get(`/community/public/articles/${articleId}/comments`, { params }),

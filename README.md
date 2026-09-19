@@ -7,7 +7,7 @@ MindWeave 是基于 Spring Boot 3 + React 18 + Semi Design 的个人综合系统
 ## 功能
 
 - 公开知识花园（`/blog`）：站点默认入口，深色"菌丝体"视觉，首屏为随指针转动、可聚焦群落的 3D 知识网络，支持群落筛选、标题/摘要/标签搜索、按新鲜度展示的卡片流与文章阅读页（自动生成目录）
-- 公开互动（`/community` 会客厅 · `/guestbook` 留言板）：两个独立板块。会客厅是即时公开的多房间聊天，游客免登录或登录后即可发言，**发布即公开、无需审核**，管理员可在后台删除；留言板与文章评论仍需先审后发。文章可逐篇开启评论
+- 公开互动（`/community` 会客厅 · `/guestbook` 留言板）：两个独立板块。会客厅是**SSE 实时推送**的多房间聊天（在线成员列表、输入中提示、气泡对话流），游客免登录或登录后即可发言，**发布即公开、无需审核**，管理员可在后台删除；留言板与文章评论仍需先审后发。文章可逐篇开启评论
 - 登录认证：管理员（ADMIN）/ 数据维护（MANAGER）/ 只读（VIEWER）三种角色
 - 仪表盘：支持时间区间选择，区间实发合计、区间总薪资合计、区间记录月数、区间批注总数与全部图表随区间联动
 - 工资记录：按月/年/考核等级/批注关键词/实发区间查询，组合列展示（加项合计默认展开，扣项合计、公司合计、另发奖金默认收起且带不同浅色底色，可一键展开/收起），另发奖金=其他奖金+年度实发，表格列顺序为 实发金额 → 另发奖金 → 总薪资，金额列支持点击表头排序（后端排序），操作列图标按钮组，新增记录可一键复制历史月份数据，月度详情卡片式展示（字段对齐、分区底色），分页默认每页 50 条，可选 20/50/100/500；筛选区域 PC 端固定置顶
@@ -42,6 +42,42 @@ MindWeave 是基于 Spring Boot 3 + React 18 + Semi Design 的个人综合系统
 
 > 知识花园使用一套独立的深色"菌床"配色，与后台的浅紫主题互不影响；标题使用衬线体，
 > 在中文环境或有网络时加载 Noto Serif SC，不可用时回退到系统衬线字体。
+
+## 会客厅的实时方案
+
+会客厅不是轮询，而是一条 SSE 长连接（`/api/community/public/rooms/{id}/stream`）：
+新消息、在线成员列表、正在输入提示都由服务端推送。消息**先同步写入 Oracle 再广播**，
+所以"看到的消息一定已经落库"，不会出现推送成功但数据丢失。
+
+| 能力 | 说明 |
+| --- | --- |
+| 消息推送 | 发言后房间内所有人立即收到，无需刷新 |
+| 在线列表 | 谁在这个房间、谁是成员/游客；正常关闭页面即时下线，异常断线由心跳兜底 |
+| 输入中提示 | 客户端按键触发，服务端按 3 秒限流，避免每次按键都推送 |
+| 连接状态 | 页面显示 连接中/已连接/重连中/轮询模式 |
+| 降级 | 推送不可用时前端自动退回 6 秒轮询；`community.realtime.enabled=false` 可整体关闭 |
+
+参数都在 `application.yml` 的 `community.realtime` 下：心跳 15 秒、在线超时 8 秒、
+淘汰间隔 5 秒、单连接最长 30 分钟。**如果前面挂了反向代理，必须为这条路径关闭
+proxy_buffering**，否则推送会被网关缓冲住（见 `deploy/openresty-mind-weave.conf` 中的专用 location）。
+
+### 关于 Kafka：为什么没有直接用它当主链路
+
+Kafka 是"后端到后端"的传输层，浏览器和小程序都说不了 Kafka 协议，所以**到达客户端这一段
+仍然必须是 SSE 或 WebSocket**——换成 Kafka 并不能替代它。当前这套方案里，广播被抽象成
+`RealtimeBroadcaster` 接口（默认实现 `InMemorySseBroadcaster`），将来要让 AI 智能体、
+小程序或其它实例订阅会客厅消息时，按这个接口再写一个 Kafka 实现即可：消息照旧同步落库并
+推给在线客户端，同时额外发一份事件到 topic，不牺牲可靠性。接入步骤：
+
+1. `pom.xml` 加 `spring-boot-starter-kafka`；
+2. 在 `community/realtime/` 下新增 `KafkaRealtimeBroadcaster implements RealtimeBroadcaster`，
+   标注 `@ConditionalOnProperty(name = "community.realtime.transport", havingValue = "kafka")`；
+3. 给内存实现加 `havingValue = "memory", matchIfMissing = true`，用配置切换；
+4. topic 名称沿用 `community.realtime.kafka-topic`（默认 `mindweave.community.room`）。
+
+> 单节点 Kafka 记得把 `offsets.topic.replication.factor` 设为 1，否则消费者起不来；
+> 另外 broker 的 `advertised.listeners` 必须是**调用方能访问到的地址**，
+> 只在内网暴露时，部署在服务器上的后端可以连，本机开发连不上。
 
 停止服务：双击 `stop-backend.bat`。
 

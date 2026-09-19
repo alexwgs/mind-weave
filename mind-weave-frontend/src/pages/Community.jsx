@@ -1,24 +1,43 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Button, Empty, Spin, Toast } from '@douyinfe/semi-ui'
-import { IconArrowRight, IconMail, IconRefresh } from '@douyinfe/semi-icons'
+import { Button, Spin, Toast } from '@douyinfe/semi-ui'
+import { IconArrowRight, IconMail, IconUserGroup } from '@douyinfe/semi-icons'
 import { communityApi } from '../api'
 import { useAuth } from '../auth'
-import { CommunityTopbar, Composer, Post } from '../components/community'
+import { openRoomStream, guestName, rememberGuestName, viewerId } from '../realtime'
+import { ChatStream, CommunityTopbar, Composer, ViewerList } from '../components/community'
 import '../community.css'
+
+const STATUS_TEXT = {
+  connecting: '连接中',
+  live: '已连接',
+  reconnecting: '重连中',
+  polling: '轮询模式',
+  closed: '已断开'
+}
+
+const TYPING_TTL_MS = 4000
 
 export default function Community() {
   const auth = useAuth()
   const isLoggedIn = !!auth.user
+  const selfId = useMemo(() => viewerId(), [])
   const [rooms, setRooms] = useState([])
   const [roomId, setRoomId] = useState(null)
   const [messages, setMessages] = useState([])
+  const [viewers, setViewers] = useState([])
+  const [typingMap, setTypingMap] = useState({})
+  const [status, setStatus] = useState('connecting')
   const [loading, setLoading] = useState(true)
   const [sending, setSending] = useState(false)
-  const [nickname, setNickname] = useState(() => localStorage.getItem('mindweave_guest_name') || '')
+  const [nickname, setNickname] = useState(() => guestName())
   const [content, setContent] = useState('')
-  const [mineIds, setMineIds] = useState([])
-  const streamRef = useRef(null)
+  const chatRef = useRef(null)
+  const nicknameRef = useRef(nickname)
+  nicknameRef.current = nickname
+  const lastTypingSent = useRef(0)
+
+  const displayName = auth.user?.displayName || auth.user?.username || nickname.trim()
 
   useEffect(() => {
     communityApi.rooms()
@@ -29,38 +48,71 @@ export default function Community() {
       .finally(() => setLoading(false))
   }, [])
 
-  const loadMessages = useCallback(async (quiet = false) => {
+  /** 拉取完整消息列表；轮询兜底与发送后对齐都走这里 */
+  const reload = useCallback(async () => {
     if (!roomId) return
-    if (!quiet) setLoading(true)
-    try {
-      const page = await communityApi.messages(roomId, { page: 1, size: 80 })
-      // 接口按时间倒序返回，会客厅按对话顺序阅读
-      setMessages([...(page.records || [])].reverse())
-    } finally {
-      if (!quiet) setLoading(false)
-    }
+    const page = await communityApi.messages(roomId, { page: 1, size: 80 })
+    setMessages([...(page.records || [])].reverse())
   }, [roomId])
 
-  useEffect(() => { loadMessages() }, [loadMessages])
+  useEffect(() => { reload().catch(() => {}) }, [reload])
 
-  // 会客厅是活的空间：静默轮询，不打断阅读
+  // 实时连接：消息、在线列表、输入中提示都由服务端推送，不再轮询消息
   useEffect(() => {
-    const timer = setInterval(() => {
-      if (document.visibilityState === 'visible') loadMessages(true)
-    }, 6000)
+    if (!roomId) return undefined
+    setStatus('connecting')
+    const handle = openRoomStream(roomId, {
+      nickname: nicknameRef.current,
+      onViewers: setViewers,
+      onStatus: setStatus,
+      onEvent: (event) => {
+        if (event.kind === 'message' && event.message) {
+          const incoming = event.message
+          setMessages((items) => (items.some((item) => item.id === incoming.id) ? items : [...items, incoming]))
+        } else if (event.kind === 'typing' && event.viewerId && event.viewerId !== selfId) {
+          setTypingMap((map) => ({ ...map, [event.viewerId]: { name: event.name, at: Date.now() } }))
+        } else if (event.kind === 'poll') {
+          reload().catch(() => {})
+        }
+      }
+    })
+    // 关闭页面/切走时告知服务端，在线列表立刻少一个人，不必等心跳超时
+    const leave = () => { navigator.sendBeacon?.(`/api/community/public/rooms/${roomId}/presence/leave`, new Blob([JSON.stringify({ viewerId: selfId })], { type: 'application/json' })) }
+    window.addEventListener('pagehide', leave)
+    return () => {
+      window.removeEventListener('pagehide', leave)
+      handle.close()
+    }
+  }, [roomId, selfId, reload])
+
+  // 输入中提示：本地按 4 秒过期，避免提示一直挂着
+  const typing = useMemo(
+    () => Object.entries(typingMap).filter(([, item]) => Date.now() - item.at < TYPING_TTL_MS).map(([, item]) => item.name),
+    [typingMap]
+  )
+  useEffect(() => {
+    if (!typing.length) return undefined
+    const timer = setInterval(() => setTypingMap((map) => ({ ...map })), 1000)
     return () => clearInterval(timer)
-  }, [loadMessages])
+  }, [typing.length])
 
-  // 新消息落在底部，跟随到最后
+  // 新消息进来滚动到底部
   useEffect(() => {
-    const node = streamRef.current
-    if (!node) return
+    const node = chatRef.current
+    if (!node) return undefined
     const timer = setTimeout(() => { node.scrollTop = node.scrollHeight }, 60)
     return () => clearTimeout(timer)
-  }, [messages.length, roomId, loading])
+  }, [messages.length, typing.length, roomId, loading])
 
   const activeRoom = useMemo(() => rooms.find((room) => room.id === roomId), [rooms, roomId])
-  const displayName = auth.user?.displayName || auth.user?.username || nickname.trim()
+
+  const notifyTyping = () => {
+    if (!roomId) return
+    const now = Date.now()
+    if (now - lastTypingSent.current < 2500) return
+    lastTypingSent.current = now
+    communityApi.typing(roomId, { viewerId: selfId }).catch(() => {})
+  }
 
   const send = async () => {
     if (!roomId) return Toast.warning('请先选择一个房间')
@@ -69,9 +121,8 @@ export default function Community() {
     setSending(true)
     try {
       const item = await communityApi.postMessage(roomId, { nickname: nickname.trim(), content: content.trim() })
-      if (!isLoggedIn) localStorage.setItem('mindweave_guest_name', nickname.trim())
-      setMessages((items) => [...items, item])
-      setMineIds((ids) => [...ids, item.id])
+      if (!isLoggedIn) setNickname(rememberGuestName(nickname))
+      setMessages((items) => (items.some((existing) => existing.id === item.id) ? items : [...items, item]))
       setContent('')
       Toast.success('已发言，大家都能看到了')
     } finally {
@@ -90,7 +141,9 @@ export default function Community() {
             <h1>织友会客厅</h1>
             <p>聊天是当下的相遇。挑一个房间坐下来，说句话就走，也不用等谁审核。</p>
             <div className="community-hero-actions">
-              <span className="community-status is-live"><i />{rooms.length ? `${rooms.length} 个房间开放中 · 发言即时可见` : '正在打开房间'}</span>
+              <span className={`community-status${status === 'live' ? ' is-live' : ''}`}>
+                <i />{activeRoom ? `${activeRoom.name} · ${viewers.length} 人在线 · ${STATUS_TEXT[status] || status}` : '正在打开房间'}
+              </span>
               <Link className="action-quiet" to="/guestbook">去留言板留句话 <IconArrowRight /></Link>
             </div>
           </div>
@@ -131,34 +184,35 @@ export default function Community() {
                 <h2>{activeRoom?.name || '聊天室'}</h2>
               </div>
               <div className="community-head-meta">
-                <span className="community-status is-live"><i />即时公开</span>
-                <Button theme="borderless" size="small" icon={<IconRefresh />} onClick={() => loadMessages()} aria-label="刷新消息">刷新</Button>
+                <span className={`community-status${status === 'live' ? ' is-live' : ''}`}><i />{STATUS_TEXT[status] || status}</span>
               </div>
             </div>
 
-            <div className="community-stream" ref={streamRef}>
+            <div className="community-stream community-chat-scroll" ref={chatRef}>
               {loading
                 ? <Spin />
-                : messages.length
-                  ? messages.map((item) => <Post key={item.id} item={item} mine={mineIds.includes(item.id)} />)
-                  : (
-                    <Empty
-                      image={<span className="community-empty-mark" aria-hidden="true">✳</span>}
-                      description={<div className="community-empty"><h3>{activeRoom ? '这个房间还很安静' : '还没有开放的房间'}</h3><p>说第一句话，把这里点亮。</p></div>}
-                    />
-                  )}
+                : (
+                  <ChatStream
+                    messages={messages}
+                    viewer={displayName}
+                    typing={typing}
+                    emptyHint={activeRoom ? undefined : { title: '还没有开放的房间', hint: '等管理员开一个房间再来。' }}
+                  />
+                )}
             </div>
 
             <Composer
               value={content}
               onChange={setContent}
+              onTyping={notifyTyping}
               nickname={nickname}
               onNicknameChange={setNickname}
               user={auth.user}
               sending={sending}
               onSend={send}
+              disabled={!roomId}
               maxLength={1000}
-              placeholder={activeRoom ? `在「${activeRoom.name}」说点什么…` : '先选择一个房间…'}
+              placeholder={activeRoom ? `在「${activeRoom.name}」说点什么…（回车发送，Shift+回车换行）` : '先选择一个房间…'}
               reviewNote="发送后立即公开，管理员可在后台删除。"
               actionLabel="发言"
             />
@@ -166,18 +220,18 @@ export default function Community() {
 
           <aside className="community-col community-rail">
             <div className="community-panel">
+              <div className="community-panel-heading">
+                <IconUserGroup size="small" /> 在线 {viewers.length ? `· ${viewers.length}` : ''}
+              </div>
+              <ViewerList viewers={viewers} selfId={selfId} />
+            </div>
+            <div className="community-panel">
               <div className="community-panel-heading">房间说明</div>
               <div className="community-rail-list">
                 <p>{activeRoom?.description || '选择一个房间后，这里会显示它的说明。'}</p>
                 <span className="community-rail-rule" />
-                <p><b>无需审核</b><br />消息发送后立即出现在房间底部，管理员不会先看一遍。</p>
-                <p><b>可以删除</b><br />如果内容不合适，管理员可以在后台直接删除。</p>
-              </div>
-            </div>
-            <div className="community-panel">
-              <div className="community-panel-heading">想认真说点什么？</div>
-              <div className="community-rail-list">
-                <p>留言板上的留言会先经过一次审核再公开，适合写长一点、留得久一点的话。</p>
+                <p><b>无需审核</b><br />消息发送后立即出现在房间底部。</p>
+                <p><b>可以删除</b><br />内容不合适时，管理员可在后台直接删除。</p>
                 <Link className="action-quiet" to="/guestbook">打开留言板 <IconMail size="small" /></Link>
               </div>
             </div>

@@ -149,6 +149,14 @@ docker inspect mind-weave --format '{{range .Config.Env}}{{println .}}{{end}}' |
 
 > 已经执行过 `toolkit-schema.sql` 的现有环境，上线公开互动功能前只执行一次 `db/community-upgrade.sql`；它会创建聊天室、留言板、文章评论表，并给文章表增加评论开关。新安装环境不要重复执行升级脚本。
 
+> **会客厅是 SSE 实时推送，反向代理必须放行长连接。** 使用本仓库的
+> `deploy/openresty-mind-weave.conf` 时已包含专用 location（`^~ /api/community/public/rooms/`，
+> 关闭 `proxy_buffering`、`gzip`，并放宽 `proxy_read_timeout`）。
+> 若你自己写 nginx/面板配置，**漏掉 `proxy_buffering off` 会让实时推送静默失效**：
+> 本地开发正常，部署后消息要等很久才出现——因为响应被网关缓冲住了。
+> 另外 `proxy_read_timeout` 必须大于后端心跳间隔（默认 15 秒），否则连接会被定时掐断、
+> 前端反复重连。
+
 ## 4. 用面板"进程守护"启动后端
 
 OnePanel → **进程守护**（若无此项，见文末备选）：

@@ -12,6 +12,10 @@ import com.salary.community.mapper.ArticleCommentMapper;
 import com.salary.community.mapper.ChatMessageMapper;
 import com.salary.community.mapper.ChatRoomMapper;
 import com.salary.community.mapper.GuestbookEntryMapper;
+import com.salary.community.realtime.PresenceService;
+import com.salary.community.realtime.RealtimeBroadcaster;
+import com.salary.community.realtime.RoomEvent;
+import com.salary.community.realtime.Viewer;
 import com.salary.entity.AppUser;
 import com.salary.mapper.AppUserMapper;
 import com.salary.security.SecurityUtils;
@@ -26,6 +30,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -50,7 +55,10 @@ public class CommunityService {
     private final AppUserMapper userMapper;
     private final PermissionService permissionService;
     private final LogService logService;
+    private final RealtimeBroadcaster broadcaster;
+    private final PresenceService presence;
     private final Map<String, Long> recentPosts = new ConcurrentHashMap<>();
+    private final Map<String, Long> recentTyping = new ConcurrentHashMap<>();
 
     public List<ChatRoom> publicRooms() {
         return roomMapper.selectList(new LambdaQueryWrapper<ChatRoom>()
@@ -81,7 +89,69 @@ public class CommunityService {
         item.setSourceHash(sourceHash(req, http));
         item.setCreatedAt(LocalDateTime.now());
         messageMapper.insert(item);
+        // 落库成功后再广播：保证"看到的消息一定已经存下来"
+        broadcaster.broadcast(roomId, RoomEvent.message(item));
         return item;
+    }
+
+    /** 订阅房间实时流。成员身份在此同步解析，异步阶段不再依赖 SecurityContext */
+    public SseEmitter stream(Long roomId, String viewerId, String nickname) {
+        requireActiveRoom(roomId);
+        String member = viewerDisplayName();
+        boolean guest = member == null;
+        String name = guest ? nickname : member;
+        if (name == null || name.isBlank()) throw new BizException("请先填写昵称");
+        if (name.trim().length() > 24) throw new BizException("昵称最多 24 个字符");
+        Viewer viewer = presence.join(roomId, viewerId, name.trim(), guest);
+        return broadcaster.subscribe(roomId, viewer);
+    }
+
+    /** 加入/刷新在线状态。昵称由调用方给出（游客昵称或登录后的展示名） */
+    public List<Viewer> joinRoom(Long roomId, String viewerId, String name) {
+        requireActiveRoom(roomId);
+        String member = viewerDisplayName();
+        boolean guest = member == null;
+        String label = guest ? name : member;
+        if (label == null || label.isBlank()) throw new BizException("请先填写昵称");
+        presence.join(roomId, viewerId, label.trim(), guest);
+        broadcaster.onViewersChanged(roomId);
+        return presence.viewers(roomId);
+    }
+
+    public List<Viewer> presence(Long roomId) {
+        return presence.viewers(roomId);
+    }
+
+    public void leaveRoom(Long roomId, String viewerId) {
+        presence.leave(roomId, viewerId);
+        broadcaster.onViewersChanged(roomId);
+    }
+
+    /** 输入中提示。限流：同一个人 3 秒内只广播一次，避免每次按键都推送 */
+    public void typing(Long roomId, String viewerId) {
+        requireActiveRoom(roomId);
+        String name = presence.name(roomId, viewerId).orElse(null);
+        if (name == null) return;
+        String throttleKey = roomId + ":" + viewerId;
+        long now = System.currentTimeMillis();
+        Long before = recentTyping.put(throttleKey, now);
+        if (before != null && now - before < 3_000) {
+            recentTyping.put(throttleKey, before);
+            return;
+        }
+        if (recentTyping.size() > 10_000) recentTyping.entrySet().removeIf(e -> now - e.getValue() > 300_000);
+        broadcaster.broadcast(roomId, RoomEvent.typing(viewerId, name));
+    }
+
+    /** 当前登录用户的展示名；未登录返回 null（调用方退回游客昵称） */
+    public String viewerDisplayName() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated() || auth instanceof AnonymousAuthenticationToken) return null;
+        AppUser user = userMapper.selectOne(new LambdaQueryWrapper<AppUser>().eq(AppUser::getUsername, auth.getName()));
+        if (user != null && user.getDisplayName() != null && !user.getDisplayName().isBlank()) {
+            return user.getDisplayName().trim();
+        }
+        return auth.getName();
     }
 
     public Page<GuestbookEntry> publicGuestbook(int page, int size) {
@@ -215,6 +285,8 @@ public class CommunityService {
         if (body.containsKey("sortOrder")) room.setSortOrder(number(body.get("sortOrder"), 0));
         room.setUpdatedAt(LocalDateTime.now());
         roomMapper.updateById(room);
+        // 房间被关闭时立刻断开房间内的实时连接，避免继续往已关闭的房间发言
+        if (!Integer.valueOf(1).equals(room.getActive())) broadcaster.complete(room.getId());
         return room;
     }
 
