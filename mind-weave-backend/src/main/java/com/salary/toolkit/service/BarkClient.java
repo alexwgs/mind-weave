@@ -29,9 +29,13 @@ public class BarkClient {
     }
 
     public boolean send(String barkUrl, String title, String body) {
+        return send(barkUrl, title, body, "MindWeave 日程");
+    }
+
+    public boolean send(String barkUrl, String title, String body, String group) {
         if (barkUrl == null || barkUrl.isBlank()) return false;
         try {
-            String url = trimSlash(barkUrl) + "/" + enc(title) + "/" + enc(body) + "?group=" + enc("MindWeave 日程");
+            String url = trimSlash(barkUrl) + "/" + enc(title) + "/" + enc(body) + "?group=" + enc(group);
             HttpRequest req = HttpRequest.newBuilder(URI.create(url))
                     .timeout(Duration.ofSeconds(10))
                     .GET()

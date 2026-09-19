@@ -54,9 +54,8 @@ export default function Guestbook() {
 
   return (
     <div className="community-page">
+      <CommunityTopbar active="guestbook" isLoggedIn={isLoggedIn} />
       <div className="community-shell">
-        <CommunityTopbar active="guestbook" isLoggedIn={isLoggedIn} />
-
         <section className="community-hero">
           <div>
             <span className="section-eyebrow">PUBLIC COMMONS · 留言板</span>

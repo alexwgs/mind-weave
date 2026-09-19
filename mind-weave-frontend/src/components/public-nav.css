@@ -1,0 +1,22 @@
+.public-nav-shell { position: sticky; top: 0; z-index: 80; display: flex; align-items: center; gap: 22px; min-height: 68px; padding: 0 clamp(16px, 3vw, 34px); color: var(--app-ink); background: color-mix(in srgb, var(--app-surface) 92%, transparent); border-bottom: 1px solid var(--app-border); backdrop-filter: blur(14px); }
+.public-nav-brand { display: flex; align-items: center; gap: 10px; flex: none; color: var(--app-ink); }
+.public-nav-mark { display: grid; place-items: center; width: 38px; height: 38px; color: #fff; background: var(--app-primary); border-radius: 12px; }
+.public-nav-mark svg { width: 28px; height: 28px; fill: currentColor; }
+.public-nav-brand > span:last-child { display: flex; flex-direction: column; gap: 2px; }
+.public-nav-brand strong { font-family: var(--app-display); font-size: 16px; letter-spacing: .02em; }
+.public-nav-brand small { color: var(--app-muted); font-size: 9px; letter-spacing: .18em; }
+.public-nav-links { display: flex; align-items: center; gap: 4px; margin-left: auto; }
+.public-nav-links a { display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px; color: var(--app-muted); border-radius: 9px; font-size: 12px; }
+.public-nav-links a:hover { color: var(--app-ink); background: var(--app-bg); }
+.public-nav-links a.is-active { color: var(--app-primary); background: var(--app-lilac); font-weight: 600; }
+.public-nav-actions { display: flex; align-items: center; gap: 8px; flex: none; }
+.public-nav-actions .semi-button { color: var(--app-muted); }
+.public-nav-workspace { padding: 8px 13px; color: #fff; background: var(--app-primary); border-radius: 9px; font-size: 12px; }
+.public-nav-workspace:hover { color: #fff; filter: brightness(.94); }
+@media (max-width: 700px) {
+  .public-nav-shell { gap: 8px; min-height: 60px; padding: 0 12px; }
+  .public-nav-brand > span:last-child, .public-nav-links .semi-icon, .public-nav-workspace { display: none; }
+  .public-nav-links { gap: 0; }
+  .public-nav-links a { padding: 7px 8px; font-size: 11px; }
+  .public-nav-actions { margin-left: auto; }
+}

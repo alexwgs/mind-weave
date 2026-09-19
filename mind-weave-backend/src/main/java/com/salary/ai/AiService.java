@@ -35,6 +35,25 @@ public class AiService {
 
     private static final int MAX_ROUNDS = 6;
 
+    /** 会客厅角色回复：复用系统模型配置，但禁用工具，避免公开聊天触发私有数据操作。 */
+    public String chatForCommunity(String systemPrompt, List<ChatMessage> history) {
+        String apiKey = decryptKey();
+        if (apiKey == null || apiKey.isBlank()) throw new BizException("系统尚未配置 AI API Key");
+        String model = settingService.systemValue("ai.model");
+        if (model == null || model.isBlank()) model = "deepseek-chat";
+        String baseUrl = settingService.systemValue("ai.baseUrl");
+        if (baseUrl == null || baseUrl.isBlank()) baseUrl = "https://api.deepseek.com";
+        List<Map<String, Object>> messages = new ArrayList<>();
+        messages.add(new LinkedHashMap<>(Map.of("role", "system", "content", systemPrompt)));
+        if (history != null) for (ChatMessage message : history) {
+            if (message.getRole() != null && message.getContent() != null) {
+                messages.add(new LinkedHashMap<>(Map.of("role", message.getRole(), "content", message.getContent())));
+            }
+        }
+        JsonNode response = call(model, baseUrl, apiKey, messages, false, 800);
+        return response.path("choices").get(0).path("message").path("content").asText("");
+    }
+
     public ChatResponse chat(List<ChatMessage> history) {
         String apiKey = decryptKey();
         if (apiKey == null || apiKey.isBlank()) {
@@ -128,14 +147,20 @@ public class AiService {
     }
 
     private JsonNode call(String model, String baseUrl, String apiKey, List<Map<String, Object>> messages) {
+        return call(model, baseUrl, apiKey, messages, true, 2000);
+    }
+
+    private JsonNode call(String model, String baseUrl, String apiKey, List<Map<String, Object>> messages, boolean toolsEnabled, int maxTokens) {
         try {
             Map<String, Object> body = new LinkedHashMap<>();
             body.put("model", model);
             body.put("messages", messages);
             body.put("temperature", 0.3);
-            body.put("max_tokens", 2000);
-            body.put("tools", aiTools.definitions());
-            body.put("tool_choice", "auto");
+            body.put("max_tokens", maxTokens);
+            if (toolsEnabled) {
+                body.put("tools", aiTools.definitions());
+                body.put("tool_choice", "auto");
+            }
             String url = trimSlash(baseUrl) + "/chat/completions";
             HttpRequest req = HttpRequest.newBuilder(URI.create(url))
                     .timeout(Duration.ofSeconds(90))

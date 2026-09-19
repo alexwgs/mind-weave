@@ -59,7 +59,7 @@ export default function AppLayout() {
         {items.map(([key, name, Icon]) => <NavLink key={key} to={`/${key}`} className={({ isActive }) => `workspace-nav-link${isActive || (key === 'articles' && ['article', 'article-view', 'portal'].includes(current)) ? ' is-active' : ''}`}><Icon /><span>{name}</span><span className="nav-active-dot" /></NavLink>)}
       </div>
     })}</nav>
-    {auth.can('articles') && <NavLink to="/portal" className="sidebar-garden"><IconEyeOpened /><span>逛逛文章花园<small>再读一遍，或有新发现</small></span><span>↗</span></NavLink>}
+    {auth.can('articles') && <a href="/blog" target="_blank" rel="noreferrer" className="sidebar-garden"><IconEyeOpened /><span>逛逛文章花园<small>在新窗口浏览公开文章</small></span><span>↗</span></a>}
     <div className="sidebar-foot"><span className="status-dot" /> 每一点积累，都算数。</div>
   </div>
   return <div className="workspace-shell">

@@ -13,12 +13,12 @@ import com.salary.community.realtime.PresenceService;
 import com.salary.community.realtime.RealtimeBroadcaster;
 import com.salary.community.realtime.RoomEvent;
 import com.salary.community.realtime.Viewer;
-import com.salary.entity.AppUser;
 import com.salary.mapper.AppUserMapper;
 import com.salary.security.SecurityUtils;
 import com.salary.service.LogService;
 import com.salary.service.PermissionService;
 import com.salary.toolkit.mapper.TkArticleMapper;
+import com.salary.toolkit.service.AttachmentService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -57,6 +57,8 @@ class CommunityServiceTest {
     @Mock private LogService logService;
     @Mock private RealtimeBroadcaster broadcaster;
     @Mock private PresenceService presence;
+    @Mock private AttachmentService attachmentService;
+    @Mock private ModerationNotificationService moderationNotificationService;
 
     @InjectMocks private CommunityService service;
 
@@ -108,18 +110,12 @@ class CommunityServiceTest {
         assertEquals("APPROVED", event.getValue().message().getStatus());
     }
 
-    /** 成员身份在请求线程内同步解析，异步推流阶段不再依赖 SecurityContext */
+    /** EventSource 不带 JWT；它必须复用此前 presence HTTP 请求登记的成员身份。 */
     @Test
-    void streamResolvesMemberIdentityFromSecurityContext() {
+    void streamReusesIdentityRegisteredByAuthenticatedPresenceRequest() {
         activeRoom(1L);
-        SecurityContextHolder.getContext().setAuthentication(
-                new UsernamePasswordAuthenticationToken("wei", null, java.util.List.of()));
-        AppUser user = new AppUser();
-        user.setUsername("wei");
-        user.setDisplayName("魏根生");
-        when(userMapper.selectOne(any())).thenReturn(user);
-        when(presence.join(eq(1L), eq("viewer-1"), eq("魏根生"), eq(false)))
-                .thenReturn(new Viewer("viewer-1", "魏根生", false));
+        when(presence.viewer(1L, "viewer-1"))
+                .thenReturn(java.util.Optional.of(new Viewer("viewer-1", "魏根生", false)));
         when(broadcaster.subscribe(eq(1L), any())).thenReturn(new SseEmitter());
 
         service.stream(1L, "viewer-1", "游客昵称不该被采用");
@@ -129,6 +125,7 @@ class CommunityServiceTest {
         assertEquals("魏根生", viewer.getValue().name(), "登录用户应使用账号展示名");
         assertEquals(false, viewer.getValue().guest());
         assertEquals("viewer-1", viewer.getValue().id());
+        verify(presence, never()).join(eq(1L), eq("viewer-1"), any(), eq(true));
     }
 
     @Test
@@ -166,6 +163,7 @@ class CommunityServiceTest {
         ArgumentCaptor<GuestbookEntry> saved = ArgumentCaptor.forClass(GuestbookEntry.class);
         verify(guestbookMapper).insert(saved.capture());
         assertEquals("PENDING", saved.getValue().getStatus(), "留言板仍应先审后发");
+        verify(moderationNotificationService).pending("留言板", "木棉", "希望一直都在");
     }
 
     @Test

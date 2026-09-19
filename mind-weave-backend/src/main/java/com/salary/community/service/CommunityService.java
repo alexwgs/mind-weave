@@ -22,7 +22,9 @@ import com.salary.security.SecurityUtils;
 import com.salary.service.LogService;
 import com.salary.service.PermissionService;
 import com.salary.toolkit.entity.TkArticle;
+import com.salary.toolkit.entity.TkAttachment;
 import com.salary.toolkit.mapper.TkArticleMapper;
+import com.salary.toolkit.service.AttachmentService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -30,6 +32,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.nio.charset.StandardCharsets;
@@ -57,6 +60,9 @@ public class CommunityService {
     private final LogService logService;
     private final RealtimeBroadcaster broadcaster;
     private final PresenceService presence;
+    private final AttachmentService attachmentService;
+    private final ModerationNotificationService moderationNotificationService;
+    private final CommunityAiService communityAiService;
     private final Map<String, Long> recentPosts = new ConcurrentHashMap<>();
     private final Map<String, Long> recentTyping = new ConcurrentHashMap<>();
 
@@ -66,6 +72,10 @@ public class CommunityService {
                 .orderByAsc(ChatRoom::getSortOrder)
                 .orderByAsc(ChatRoom::getId));
     }
+
+    public List<com.salary.community.dto.CommunityAiAgent> aiAgents() { return communityAiService.publicAgents(); }
+    public List<com.salary.community.dto.CommunityAiAgent> adminAiAgents() { return communityAiService.adminAgents(); }
+    public List<com.salary.community.dto.CommunityAiAgent> saveAiAgents(List<com.salary.community.dto.CommunityAiAgent> agents) { return communityAiService.saveAgents(agents); }
 
     public Page<ChatMessage> publicMessages(Long roomId, int page, int size) {
         requireActiveRoom(roomId);
@@ -91,18 +101,36 @@ public class CommunityService {
         messageMapper.insert(item);
         // 落库成功后再广播：保证"看到的消息一定已经存下来"
         broadcaster.broadcast(roomId, RoomEvent.message(item));
+        if (author.username() != null && item.getContent().contains("@")) {
+            communityAiService.replyToMentions(roomId, item, author.username());
+        }
         return item;
     }
 
-    /** 订阅房间实时流。成员身份在此同步解析，异步阶段不再依赖 SecurityContext */
+    public TkAttachment uploadChatAttachment(Long roomId, MultipartFile file, String nickname,
+                                             String visitorToken, HttpServletRequest http) {
+        requireActiveRoom(roomId);
+        PublicPostRequest req = new PublicPostRequest();
+        req.setNickname(nickname);
+        req.setVisitorToken(visitorToken);
+        Author author = author(req);
+        throttle("chat-upload:" + roomId, req, http);
+        String owner = author.username() == null ? "guest:" + sourceHash(req, http) : author.username();
+        return attachmentService.uploadCommunity(file, roomId, owner);
+    }
+
+    /**
+     * 订阅房间实时流。EventSource 无法携带 Bearer Header，所以前端先用普通
+     * HTTP presence 请求登记经过认证的身份；SSE 在这里复用该身份。
+     */
     public SseEmitter stream(Long roomId, String viewerId, String nickname) {
         requireActiveRoom(roomId);
-        String member = viewerDisplayName();
-        boolean guest = member == null;
-        String name = guest ? nickname : member;
-        if (name == null || name.isBlank()) throw new BizException("请先填写昵称");
-        if (name.trim().length() > 24) throw new BizException("昵称最多 24 个字符");
-        Viewer viewer = presence.join(roomId, viewerId, name.trim(), guest);
+        Viewer viewer = presence.viewer(roomId, viewerId).orElseGet(() -> {
+            String name = nickname == null ? "" : nickname.trim();
+            if (name.isBlank()) throw new BizException("请先填写昵称");
+            if (name.length() > 24) throw new BizException("昵称最多 24 个字符");
+            return presence.join(roomId, viewerId, name, true);
+        });
         return broadcaster.subscribe(roomId, viewer);
     }
 
@@ -171,6 +199,7 @@ public class CommunityService {
         item.setSourceHash(sourceHash(req, http));
         item.setCreatedAt(LocalDateTime.now());
         guestbookMapper.insert(item);
+        moderationNotificationService.pending("留言板", item.getAuthorName(), item.getContent());
         return item;
     }
 
@@ -195,6 +224,7 @@ public class CommunityService {
         item.setSourceHash(sourceHash(req, http));
         item.setCreatedAt(LocalDateTime.now());
         articleCommentMapper.insert(item);
+        moderationNotificationService.pending("文章评论", item.getAuthorName(), item.getContent());
         return item;
     }
 
@@ -243,8 +273,11 @@ public class CommunityService {
     public void delete(String type, Long id) {
         permissionService.require("community.manage");
         String normalized = normalizeType(type);
-        if ("CHAT".equals(normalized)) messageMapper.deleteById(id);
-        else if ("GUESTBOOK".equals(normalized)) guestbookMapper.deleteById(id);
+        if ("CHAT".equals(normalized)) {
+            ChatMessage message = messageMapper.selectById(id);
+            messageMapper.deleteById(id);
+            if (message != null) broadcaster.broadcast(message.getRoomId(), RoomEvent.deleted(message));
+        } else if ("GUESTBOOK".equals(normalized)) guestbookMapper.deleteById(id);
         else articleCommentMapper.deleteById(id);
         logService.record(SecurityUtils.currentUsername(), "DELETE_COMMUNITY_CONTENT", normalized, id, "删除公开互动内容");
     }

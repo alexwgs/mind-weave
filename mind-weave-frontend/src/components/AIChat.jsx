@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Button, Input, Tag } from '@douyinfe/semi-ui'
+import { AIChatDialogue, Avatar, Button, Input, Tag, Toast } from '@douyinfe/semi-ui'
 import { IconClear, IconComment, IconSend } from '@douyinfe/semi-icons'
 import { aiApi } from '../api'
 
@@ -9,8 +9,6 @@ const SUGGESTIONS = [
   '我的知识库里有哪些关于信用卡投诉的笔记？',
   '查询本月工资汇总'
 ]
-
-const HINT = ['我可以帮你管理待办、查询工资、检索并阅读你的知识库笔记、写文章、查保险箱凭证…']
 
 const SIZE_KEY = 'salary:ai-panel-size:v1'
 const MIN_W = 300
@@ -85,7 +83,7 @@ export default function AIChat() {
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const [size, setSize] = useState(() => clampSize(readStoredSize() || { w: 460, h: 600 }))
-  const listRef = useRef(null)
+  const dialogueRef = useRef(null)
   // 只有用户手动拖过才写回存储，避免窗口缩放导致的自动收窄把用户尺寸覆盖掉
   const resizedRef = useRef(false)
 
@@ -93,7 +91,7 @@ export default function AIChat() {
   const { start, dragging } = useResize(size, setSize, markResized)
 
   useEffect(() => {
-    if (listRef.current) listRef.current.scrollTop = listRef.current.scrollHeight
+    dialogueRef.current?.scrollToBottom?.(false)
   }, [messages, loading])
 
   // 窗口缩放时把面板收回可视范围
@@ -113,14 +111,14 @@ export default function AIChat() {
     const content = (text ?? input).trim()
     if (!content || loading) return
     setInput('')
-    const history = [...messages, { role: 'user', content }]
+    const history = [...messages, { id: globalThis.crypto?.randomUUID?.() || `user-${Date.now()}`, role: 'user', content, status: 'completed', createdAt: Date.now() }]
     setMessages(history)
     setLoading(true)
     try {
       const res = await aiApi.chat(history.map((m) => ({ role: m.role, content: m.content })))
-      setMessages((m) => [...m, { role: 'assistant', content: res.reply, actions: res.actions || [] }])
+      setMessages((m) => [...m, { id: globalThis.crypto?.randomUUID?.() || `assistant-${Date.now()}`, role: 'assistant', content: res.reply, actions: res.actions || [], status: 'completed', createdAt: Date.now() }])
     } catch (e) {
-      setMessages((m) => [...m, { role: 'assistant', content: '抱歉，出错了：' + (e.message || '未知错误') }])
+      setMessages((m) => [...m, { id: globalThis.crypto?.randomUUID?.() || `error-${Date.now()}`, role: 'assistant', content: '抱歉，出错了：' + (e.message || '未知错误'), status: 'failed', createdAt: Date.now() }])
     } finally {
       setLoading(false)
     }
@@ -158,36 +156,31 @@ export default function AIChat() {
             </span>
           </div>
 
-          <div className="ai-panel-body" ref={listRef}>
-            {messages.length === 0 && (
-              <div className="ai-panel-hint">
-                {HINT.map((line) => <p key={line}>{line}</p>)}
-                <p className="ai-panel-hint-tip">窗口左侧边缘可以拖动调整大小，尺寸会被记住。</p>
-              </div>
-            )}
-            {messages.map((m, i) => (
-              <div key={i} className={`ai-msg-row ${m.role === 'user' ? 'is-user' : 'is-ai'}`}>
-                <div className={`ai-bubble ${m.role === 'user' ? 'is-user' : 'is-ai'}`}>
-                  {m.content}
-                  {m.actions && m.actions.length > 0 && (
-                    <div className="ai-actions">
-                      <Tag size="small" color="blue">已调用 {m.actions.length} 个工具</Tag>
-                      {m.actions.slice(0, 3).map((a, j) => <div className="ai-action-line" key={j}>{a}</div>)}
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-            {loading && (
-              <div className="ai-msg-row is-ai">
-                <div className="ai-bubble is-ai is-thinking">正在思考…</div>
-              </div>
-            )}
+          <div className="ai-panel-body">
+            <AIChatDialogue
+              ref={dialogueRef}
+              className="workspace-ai-dialogue"
+              chats={loading ? [...messages, { id: 'thinking', role: 'assistant', content: '正在思考…', status: 'in_progress' }] : messages}
+              roleConfig={{ user: { name: '我' }, assistant: { name: 'MindWeave AI' } }}
+              align="leftRight"
+              mode="bubble"
+              hints={messages.length || loading ? [] : SUGGESTIONS}
+              onHintClick={send}
+              escapeHtml
+              showReset
+              onMessageReset={(message) => message?.role === 'assistant' && send(messages.slice().reverse().find((item) => item.role === 'user')?.content)}
+              onMessageCopy={async (message) => { await navigator.clipboard.writeText(String(message?.content || '')); Toast.success('已复制') }}
+              dialogueRenderConfig={{
+                renderDialogueAvatar: ({ message }) => <Avatar size="small" color={message?.role === 'user' ? 'blue' : 'violet'}>{message?.role === 'user' ? '我' : 'AI'}</Avatar>,
+                renderDialogueContent: ({ message, defaultContent }) => <div className="workspace-ai-content">{defaultContent}{message?.actions?.length > 0 && <div className="ai-actions"><Tag size="small" color="blue">已调用 {message.actions.length} 个工具</Tag>{message.actions.slice(0, 3).map((action, index) => <div className="ai-action-line" key={index}>{action}</div>)}</div>}</div>
+              }}
+              markdownRenderProps={{ linkTarget: '_blank' }}
+            />
           </div>
 
           <div className="ai-panel-foot">
             <div className="ai-suggestions">
-              {SUGGESTIONS.map((s) => (
+              {messages.length > 0 && SUGGESTIONS.map((s) => (
                 <Tag key={s} className="ai-suggestion" color="blue" onClick={() => send(s)}>{s}</Tag>
               ))}
             </div>

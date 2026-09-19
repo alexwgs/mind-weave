@@ -3,6 +3,7 @@ package com.salary.community.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.salary.common.Result;
 import com.salary.community.dto.PublicPostRequest;
+import com.salary.community.dto.CommunityAiAgent;
 import com.salary.community.entity.ArticleComment;
 import com.salary.community.entity.ChatMessage;
 import com.salary.community.entity.ChatRoom;
@@ -13,6 +14,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+import org.springframework.web.multipart.MultipartFile;
+import com.salary.toolkit.entity.TkAttachment;
 
 import java.util.List;
 import java.util.Map;
@@ -39,12 +42,20 @@ public class CommunityController {
         return Result.ok(service.postMessage(roomId, body, request));
     }
 
+    @PostMapping("/public/rooms/{roomId}/attachments")
+    public Result<TkAttachment> uploadAttachment(@PathVariable Long roomId,
+                                                 @RequestParam("file") MultipartFile file,
+                                                 @RequestParam(required = false) String nickname,
+                                                 @RequestParam(required = false) String visitorToken,
+                                                 HttpServletRequest request) {
+        return Result.ok(service.uploadChatAttachment(roomId, file, nickname, visitorToken, request));
+    }
+
     // ---------- 会客厅实时能力（SSE 推送 + 在线列表） ----------
 
     /**
-     * 订阅房间实时事件。浏览器 EventSource 无法自定义请求头，
-     * 因此成员身份在连接建立时同步解析（JWT 由过滤器从 Authorization 头读取），
-     * 异步阶段不再访问 SecurityContext。
+     * 订阅房间实时事件。浏览器 EventSource 无法自定义请求头，前端会先通过
+     * 带 Authorization 的 presence 请求登记身份，再建立这条公开 SSE 连接。
      */
     @GetMapping("/public/rooms/{roomId}/stream")
     public SseEmitter stream(@PathVariable Long roomId,
@@ -113,6 +124,17 @@ public class CommunityController {
     public Result<Void> delete(@PathVariable String type, @PathVariable Long id) {
         service.delete(type, id);
         return Result.ok();
+    }
+
+    @GetMapping("/member/ai-agents")
+    public Result<List<CommunityAiAgent>> aiAgents() { return Result.ok(service.aiAgents()); }
+
+    @GetMapping("/admin/ai-agents")
+    public Result<List<CommunityAiAgent>> adminAiAgents() { return Result.ok(service.adminAiAgents()); }
+
+    @PutMapping("/admin/ai-agents")
+    public Result<List<CommunityAiAgent>> saveAiAgents(@RequestBody List<CommunityAiAgent> agents) {
+        return Result.ok(service.saveAiAgents(agents));
     }
 
     @GetMapping("/admin/rooms")

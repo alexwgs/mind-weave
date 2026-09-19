@@ -157,6 +157,13 @@ export const communityApi = {
   rooms: () => http.get('/community/public/rooms'),
   messages: (roomId, params) => http.get(`/community/public/rooms/${roomId}/messages`, { params }),
   postMessage: (roomId, data) => http.post(`/community/public/rooms/${roomId}/messages`, { ...data, visitorToken: visitorToken() }),
+  uploadAttachment: (roomId, file, nickname) => {
+    const fd = new FormData()
+    fd.append('file', file)
+    fd.append('visitorToken', visitorToken())
+    if (nickname) fd.append('nickname', nickname)
+    return http.post(`/community/public/rooms/${roomId}/attachments`, fd)
+  },
   // 实时能力：EventSource 无法自定义请求头，所以流地址在 realtime.js 里单独拼装
   presence: (roomId, data) => http.post(`/community/public/rooms/${roomId}/presence`, { ...data, visitorToken: visitorToken() }),
   leaveRoom: (roomId, data) => http.post(`/community/public/rooms/${roomId}/presence/leave`, data),
@@ -170,7 +177,10 @@ export const communityApi = {
   deletePost: (type, id) => http.delete(`/community/admin/moderation/${type}/${id}`),
   adminRooms: () => http.get('/community/admin/rooms'),
   createRoom: (data) => http.post('/community/admin/rooms', data),
-  updateRoom: (id, data) => http.put(`/community/admin/rooms/${id}`, data)
+  updateRoom: (id, data) => http.put(`/community/admin/rooms/${id}`, data),
+  aiAgents: () => http.get('/community/member/ai-agents'),
+  adminAiAgents: () => http.get('/community/admin/ai-agents'),
+  saveAiAgents: (data) => http.put('/community/admin/ai-agents', data)
 }
 
 // ==================== MindWeave · 织脑 ====================

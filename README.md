@@ -57,9 +57,14 @@ MindWeave 是基于 Spring Boot 3 + React 18 + Semi Design 的个人综合系统
 | 连接状态 | 页面显示 连接中/已连接/重连中/轮询模式 |
 | 降级 | 推送不可用时前端自动退回 6 秒轮询；`community.realtime.enabled=false` 可整体关闭 |
 
-参数都在 `application.yml` 的 `community.realtime` 下：心跳 15 秒、在线超时 8 秒、
-淘汰间隔 5 秒、单连接最长 30 分钟。**如果前面挂了反向代理，必须为这条路径关闭
+参数都在 `application.yml` 的 `community.realtime` 下：心跳 15 秒、在线超时 45 秒、
+淘汰间隔 10 秒、单连接最长 30 分钟。**如果前面挂了反向代理，必须为这条路径关闭
 proxy_buffering**，否则推送会被网关缓冲住（见 `deploy/openresty-mind-weave.conf` 中的专用 location）。
+
+在线状态支持 `memory` 与 `redis` 两种存储。开发环境默认使用内存；生产配置默认连接
+`172.19.0.5:6379` 的 Redis，并使用 `mindweave:community:presence` 独立 key 前缀。
+浏览器先通过普通 HTTP 请求登记身份（该请求可以携带登录 JWT），随后再建立 EventSource，
+因此不会把 JWT 放入 URL，也不会让登录用户被误判成匿名游客。
 
 ### 关于 Kafka：为什么没有直接用它当主链路
 
@@ -78,6 +83,9 @@ Kafka 是"后端到后端"的传输层，浏览器和小程序都说不了 Kafka
 > 单节点 Kafka 记得把 `offsets.topic.replication.factor` 设为 1，否则消费者起不来；
 > 另外 broker 的 `advertised.listeners` 必须是**调用方能访问到的地址**，
 > 只在内网暴露时，部署在服务器上的后端可以连，本机开发连不上。
+
+当前单应用实例不启用 Kafka 客户端：Oracle 是消息事实来源，Redis 负责在线状态，SSE 负责
+推送。扩容到多个 MindWeave 实例后，再启用 Kafka 做跨实例房间事件扇出。
 
 停止服务：双击 `stop-backend.bat`。
 

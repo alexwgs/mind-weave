@@ -35,6 +35,87 @@
   overflow-x: clip;
 }
 
+/* 公开知识页复用工作台主题令牌；菌丝图仅作为内容特征，不再拥有独立配色模式。 */
+.mycelium-root {
+  --my-beddeeps: var(--app-bg); --my-bed: var(--app-bg); --my-surface: var(--app-surface);
+  --my-moss: var(--app-lilac); --my-sage: var(--app-muted); --my-spore: var(--app-ink);
+  --my-glow: var(--app-primary); --my-tan: var(--app-accent); --my-ink: var(--app-ink); --my-muted: var(--app-muted);
+  --my-display: var(--app-display); --my-body: 'PingFang SC', 'HarmonyOS Sans SC', 'Microsoft YaHei', 'Segoe UI', system-ui, sans-serif;
+  background: var(--app-bg); color: var(--app-ink);
+}
+.mycelium-root::before { background: radial-gradient(58% 42% at 76% 4%, color-mix(in srgb, var(--app-primary) 10%, transparent), transparent 62%), linear-gradient(180deg, var(--app-surface), transparent 34%); }
+.mycelium-root::after { opacity: .12; }
+
+/* 明亮模式最终覆盖：置于文件末尾，保证不会再被旧菌床规则反向覆盖。 */
+body:not([theme-mode='dark']) .mycelium-root { background: var(--app-bg); color: #25304a; }
+body:not([theme-mode='dark']) .mycelium-root::after { display: none; }
+body:not([theme-mode='dark']) .mycelium-eyebrow { color: #5543c5; background: #eee9ff; border-color: #d9d1fa; }
+body:not([theme-mode='dark']) .mycelium-eyebrow i { background: #6554d9; box-shadow: 0 0 8px #6554d966; }
+body:not([theme-mode='dark']) .mycelium-title,
+body:not([theme-mode='dark']) .mycelium-network-head h2,
+body:not([theme-mode='dark']) .mycelium-stat-num { color: #25304a; }
+body:not([theme-mode='dark']) .mycelium-lede { color: #566078; }
+body:not([theme-mode='dark']) .mycelium-lede b { color: #25304a; font-weight: 600; }
+body:not([theme-mode='dark']) .mycelium-search { background: #fff; border-color: #dedfeb; box-shadow: 0 8px 28px rgba(43,49,80,.09); backdrop-filter: none; }
+body:not([theme-mode='dark']) .mycelium-search:focus-within { border-color: #6554d9; box-shadow: 0 0 0 3px rgba(101,84,217,.14); }
+body:not([theme-mode='dark']) .mycelium-search input { color: #25304a; }
+body:not([theme-mode='dark']) .mycelium-search input::placeholder { color: #8a91a3; }
+body:not([theme-mode='dark']) .mycelium-search button { color: #fff; background: #6554d9; box-shadow: none; }
+body:not([theme-mode='dark']) .mycelium-stat-label,
+body:not([theme-mode='dark']) .mycelium-network-head p,
+body:not([theme-mode='dark']) .mycelium-count { color: #747d91; }
+body:not([theme-mode='dark']) .mycelium-taxon { color: #566078; background: #fff; border-color: #dedfeb; }
+body:not([theme-mode='dark']) .mycelium-taxon:hover,
+body:not([theme-mode='dark']) .mycelium-taxon.is-active { color: #5543c5; background: #eee9ff; border-color: #b8acec; }
+body:not([theme-mode='dark']) .mycelium-card,
+body:not([theme-mode='dark']) .mycelium-card:nth-child(n) { color: #25304a; background: #fff; border-color: #dedfeb; box-shadow: 0 5px 22px rgba(43,49,80,.06); }
+body:not([theme-mode='dark']) .mycelium-card.is-in:hover { border-color: #b8acec; box-shadow: 0 16px 38px rgba(43,49,80,.12); }
+body:not([theme-mode='dark']) .mycelium-card-spine { background: #6554d9; opacity: .58; }
+body:not([theme-mode='dark']) .mycelium-taxon-tag { color: #5543c5; background: #eee9ff; border-color: #d9d1fa; }
+body:not([theme-mode='dark']) .mycelium-featured { color: #b25f49; background: #fff0e9; border-color: #f2c1b3; }
+body:not([theme-mode='dark']) .mycelium-locked-tag { color: #687087; border-color: #cfd2dd; }
+body:not([theme-mode='dark']) .mycelium-card h3,
+body:not([theme-mode='dark']) .mycelium-card:hover h3 { color: #25304a; }
+body:not([theme-mode='dark']) .mycelium-card-summary,
+body:not([theme-mode='dark']) .mycelium-card-summary.is-empty { color: #566078; }
+body:not([theme-mode='dark']) .mycelium-card-foot { color: #747d91; border-top-color: #e8eaf1; }
+body:not([theme-mode='dark']) .mycelium-card-arrow { color: #6554d9; }
+body:not([theme-mode='dark']) .mycelium-card::before { background: radial-gradient(340px circle at var(--px, 50%) var(--py, 0%), rgba(101,84,217,.08), transparent 62%); }
+body:not([theme-mode='dark']) .mycelium-skeleton { border-color: #e8eaf1; background: linear-gradient(100deg, #edeef3 30%, #f8f8fb 50%, #edeef3 70%); background-size: 220% 100%; }
+body:not([theme-mode='dark']) .mycelium-more button { color: #25304a; background: #fff; border-color: #dedfeb; }
+
+/* 明亮模式下将旧版深色半透明层收敛为工作台卡片语言。 */
+.mycelium-lede, .mycelium-taxon, .mycelium-card-summary { color: var(--app-muted); }
+.mycelium-search { background: var(--app-surface); border-color: var(--app-border); box-shadow: var(--app-shadow); backdrop-filter: none; }
+.mycelium-search:focus-within { border-color: var(--app-primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--app-primary) 14%, transparent); }
+.mycelium-search input::placeholder { color: var(--app-muted); }
+.mycelium-search button { color: #fff; background: var(--app-primary); border-radius: 9px; }
+.mycelium-taxon { color: var(--app-muted); background: var(--app-surface); border-color: var(--app-border); }
+.mycelium-taxon:hover, .mycelium-taxon.is-active { color: var(--app-primary); background: var(--app-lilac); border-color: var(--app-primary); }
+.mycelium-card { background: var(--app-surface); border-color: var(--app-border); border-radius: var(--app-radius); box-shadow: var(--app-shadow); }
+.mycelium-card.is-in:hover { border-color: color-mix(in srgb, var(--app-primary) 45%, var(--app-border)); box-shadow: 0 18px 46px -24px color-mix(in srgb, var(--app-primary) 30%, transparent); }
+.mycelium-card-summary.is-empty { color: var(--app-muted); }
+.mycelium-card-foot { border-top-color: var(--app-border); }
+
+/* 文章卡片严格采用工作台的三种分组色，不再把旧菌落色铺满卡片。 */
+.mycelium-card { --card-accent: var(--app-primary); --card-tint: var(--app-lilac); color: var(--app-ink); }
+.mycelium-card:nth-child(3n + 2) { --card-accent: #5f9f84; --card-tint: var(--app-mint); }
+.mycelium-card:nth-child(3n) { --card-accent: var(--app-accent); --card-tint: var(--app-peach); }
+body:not([theme-mode='dark']) .mycelium-card {
+  background: linear-gradient(145deg, color-mix(in srgb, var(--card-tint) 42%, var(--app-surface)), var(--app-surface) 68%);
+  border-color: color-mix(in srgb, var(--card-accent) 20%, var(--app-border));
+}
+body[theme-mode='dark'] .mycelium-card {
+  background: linear-gradient(145deg, color-mix(in srgb, var(--card-tint) 18%, var(--app-surface)), var(--app-surface) 68%);
+}
+.mycelium-card-spine { background: var(--card-accent); }
+.mycelium-card:hover .mycelium-card-spine { box-shadow: 0 0 16px color-mix(in srgb, var(--card-accent) 38%, transparent); }
+.mycelium-taxon-tag { color: var(--card-accent); background: color-mix(in srgb, var(--card-accent) 9%, var(--app-surface)); border-color: color-mix(in srgb, var(--card-accent) 24%, var(--app-border)); }
+.mycelium-card h3, .mycelium-card:hover h3 { color: var(--app-ink); }
+.mycelium-card-summary, .mycelium-card-summary.is-empty, .mycelium-card-foot { color: var(--app-muted); }
+.mycelium-card-arrow { color: var(--card-accent); }
+.mycelium-card::before { background: radial-gradient(340px circle at var(--px, 50%) var(--py, 0%), color-mix(in srgb, var(--card-accent) 10%, transparent), transparent 62%); }
+
 /* 菌床光晕：两处极淡的径向呼吸，替代纯色平面 */
 .mycelium-root::before {
   content: '';
@@ -581,3 +662,12 @@
   .mycelium-hero-inner, .mycelium-stats { transform: none !important; }
   .mycelium-card:hover { transform: none; }
 }
+
+/* 必须置于文件末尾，覆盖旧版独立暗色背景层。 */
+.mycelium-root::before {
+  background:
+    radial-gradient(58% 42% at 76% 4%, color-mix(in srgb, var(--app-primary) 10%, transparent), transparent 62%),
+    radial-gradient(48% 38% at 8% 30%, color-mix(in srgb, var(--app-accent) 8%, transparent), transparent 60%),
+    linear-gradient(180deg, color-mix(in srgb, var(--app-surface) 55%, transparent), transparent 34%);
+}
+.mycelium-root::after { opacity: .12; }

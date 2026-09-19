@@ -44,7 +44,9 @@ export function rememberGuestName(name) {
 function buildStreamUrl(roomId, nickname) {
   const url = new URL(`/api/community/public/rooms/${roomId}/stream`, window.location.origin)
   url.searchParams.set('viewerId', viewerId())
-  if (!localStorage.getItem('salary_token') && nickname) url.searchParams.set('nickname', nickname.slice(0, NICKNAME_MAX))
+  // nickname 只用于 SSE 断线重连时的游客兜底，不承载认证；JWT 绝不放进 URL。
+  // 登录成员身份由建立连接前的 presence HTTP 请求用 Authorization Header 登记。
+  if (nickname) url.searchParams.set('nickname', nickname.slice(0, NICKNAME_MAX))
   return url.toString()
 }
 

@@ -22,7 +22,7 @@ public class PresencePruner {
     private final PresenceService presence;
     private final RealtimeBroadcaster broadcaster;
 
-    @Scheduled(fixedRateString = "${community.realtime.prune-interval-seconds:5}000")
+    @Scheduled(fixedRateString = "${community.realtime.prune-interval-seconds:10}000")
     public void prune() {
         List<Long> activeRooms = presence.pruneStale();
         // 在线列表变了，让房间内的人立刻看到更新

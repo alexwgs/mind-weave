@@ -8,6 +8,9 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /** 在线列表与实时广播的行为约束 */
 class InMemorySseBroadcasterTest {
@@ -57,6 +60,20 @@ class InMemorySseBroadcasterTest {
         broadcaster.broadcast(1L, RoomEvent.typing("v1", "路过的风"));
 
         assertEquals(2, broadcaster.connectionCount(1L));
+    }
+
+    @Test
+    void heartbeatRefreshesPresenceForEveryLiveConnection() {
+        PresenceService trackedPresence = mock(PresenceService.class);
+        when(trackedPresence.join(1L, "v1", "路过的风", true))
+                .thenReturn(new Viewer("v1", "路过的风", true));
+        when(trackedPresence.viewers(1L)).thenReturn(List.of(new Viewer("v1", "路过的风", true)));
+        InMemorySseBroadcaster tracked = new InMemorySseBroadcaster(properties, trackedPresence);
+        tracked.subscribe(1L, new Viewer("v1", "路过的风", true));
+
+        tracked.heartbeat(1L);
+
+        verify(trackedPresence).touch(1L, "v1");
     }
 
     /** 心跳超时的僵尸连接会被淘汰，在线人数随之下降 */

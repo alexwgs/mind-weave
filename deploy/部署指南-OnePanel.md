@@ -157,6 +157,26 @@ docker inspect mind-weave --format '{{range .Config.Env}}{{println .}}{{end}}' |
 > 另外 `proxy_read_timeout` 必须大于后端心跳间隔（默认 15 秒），否则连接会被定时掐断、
 > 前端反复重连。
 
+### 会客厅 Redis 配置
+
+生产配置默认启用 Redis 在线状态，适配当前 1Panel Docker 网络：
+
+| 环境变量 | 默认值 | 说明 |
+| --- | --- | --- |
+| `COMMUNITY_PRESENCE_STORE` | `redis` | 生产使用 Redis；本地可改为 `memory` |
+| `REDIS_HOST` | `172.19.0.5` | Redis 容器在 bridge 网络中的地址，也可改成容器名 |
+| `REDIS_PORT` | `6379` | Redis 端口 |
+| `REDIS_PASSWORD` | 空 | Redis 设置了密码时必须填写 |
+| `COMMUNITY_VIEWER_TIMEOUT_SECONDS` | `45` | 超过该时间没有心跳才判定离线 |
+| `COMMUNITY_PRUNE_INTERVAL_SECONDS` | `10` | 清理失效在线状态的间隔 |
+
+确保 MindWeave 与 Redis 容器在同一个 Docker 网络。若 Redis 开启了认证，在 OnePanel 的
+MindWeave 容器环境变量中设置 `REDIS_PASSWORD`，不要把密码写入仓库。
+
+Kafka `172.19.0.3:9092` 暂不加入单实例主链路。当前职责为：Oracle 持久化聊天与留言，
+Redis 保存在线状态，SSE 向浏览器推送；以后运行多个 MindWeave 实例时，再接 Kafka 完成
+跨实例房间事件广播。
+
 ## 4. 用面板"进程守护"启动后端
 
 OnePanel → **进程守护**（若无此项，见文末备选）：

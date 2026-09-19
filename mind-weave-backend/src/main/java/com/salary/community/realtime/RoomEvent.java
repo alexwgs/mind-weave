@@ -13,6 +13,11 @@ public record RoomEvent(String kind, ChatMessage message, String viewerId, Strin
         return new RoomEvent("message", message, null, null, null);
     }
 
+    /** 管理员删除消息，message 只需携带 id 供所有客户端同步移除 */
+    public static RoomEvent deleted(ChatMessage message) {
+        return new RoomEvent("deleted", message, null, null, null);
+    }
+
     /** 有人开始输入 */
     public static RoomEvent typing(String viewerId, String name) {
         return new RoomEvent("typing", null, viewerId, name, null);

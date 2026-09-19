@@ -14,6 +14,12 @@ spring:
     username: ${SPRING_DATASOURCE_USERNAME:trmusr}
     password: ${SPRING_DATASOURCE_PASSWORD:}
     driver-class-name: oracle.jdbc.OracleDriver
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      timeout: 2s
   servlet:
     multipart:
       max-file-size: 100MB
@@ -47,13 +53,16 @@ community:
     # 会客厅实时推送（SSE）。关闭后前端自动退回轮询，便于排查问题
     enabled: ${COMMUNITY_REALTIME_ENABLED:true}
     # 在线列表：超过该秒数没心跳即视为离线（异常断线的兜底，正常关闭页面会主动上报）
-    viewer-timeout-seconds: 8
+    viewer-timeout-seconds: ${COMMUNITY_VIEWER_TIMEOUT_SECONDS:45}
     # 淘汰异常断线成员的频率（秒）
-    prune-interval-seconds: 5
+    prune-interval-seconds: ${COMMUNITY_PRUNE_INTERVAL_SECONDS:10}
     # SSE 保活心跳（秒）。若前面挂了反向代理，必须小于代理的读超时
     heartbeat-seconds: 15
     # 单个 SSE 连接最长存活（秒），到点由浏览器自动重连以回收服务端资源
     stream-timeout-seconds: 1800
+    # memory / redis。生产容器建议 redis，本地无需 Redis 时保留 memory
+    presence-store: ${COMMUNITY_PRESENCE_STORE:memory}
+    redis-key-prefix: ${COMMUNITY_REDIS_KEY_PREFIX:mindweave:community:presence}
     # 预留：切换到 Kafka 广播实现时使用的事件 topic（当前内存实现不使用）
     kafka-topic: ${COMMUNITY_KAFKA_TOPIC:mindweave.community.room}
 

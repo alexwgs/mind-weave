@@ -89,7 +89,11 @@ public class InMemorySseBroadcaster implements RealtimeBroadcaster {
 
     @Override
     public void heartbeat(Long roomId) {
-        if (presence.count(roomId) == 0) return;
+        Map<String, SseEmitter> room = subscriptions.get(roomId);
+        if (room == null || room.isEmpty()) return;
+        // 在线的事实是“本实例仍持有活跃 SSE 连接”。每次保活同时刷新 Presence，
+        // 避免 viewer-timeout 比连接寿命短时把仍在线的人误删。
+        room.keySet().forEach(viewerId -> presence.touch(roomId, viewerId));
         broadcast(roomId, null);
     }
 

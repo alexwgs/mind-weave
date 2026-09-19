@@ -6,6 +6,7 @@ import zh_CN from '@douyinfe/semi-ui/lib/es/locale/source/zh_CN'
 import App from './App'
 import { AuthProvider } from './auth'
 import { ThemeProvider, useTheme } from './theme'
+import CommunityNotifier from './components/CommunityNotifier'
 import './styles.css'
 import './workspace.css'
 
@@ -15,6 +16,7 @@ function ThemedApp() {
     <ConfigProvider locale={zh_CN} theme={{ mode }}>
       <BrowserRouter>
         <AuthProvider>
+          <CommunityNotifier />
           <App />
         </AuthProvider>
       </BrowserRouter>

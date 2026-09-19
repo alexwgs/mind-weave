@@ -2,7 +2,9 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { IconArrowRight, IconSearch } from '@douyinfe/semi-icons'
 import { toolApi } from '../api'
+import { useAuth } from '../auth'
 import MyceliumCanvas, { colorForCategory } from '../components/MyceliumCanvas'
+import PublicNav from '../components/PublicNav'
 import '../mycelium.css'
 
 const PAGE_SIZE = 9
@@ -47,6 +49,7 @@ const cleanSummary = (value) => String(value || '')
 const reAvail = () => new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' })
 
 export default function Blog() {
+  const auth = useAuth()
   const [articles, setArticles] = useState([])
   const [topics, setTopics] = useState([])
   const [loading, setLoading] = useState(true)
@@ -130,33 +133,7 @@ export default function Blog() {
   return (
     <div className="mycelium-root">
       <div className="mycelium-shell">
-        <header className="mycelium-topbar">
-          <Link to="/blog" className="mycelium-brand" aria-label="回到知识花园首页">
-            <svg width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true">
-              <circle cx="13" cy="13" r="2.6" fill="#4fd39a" />
-              <circle cx="13" cy="13" r="6.2" stroke="#4fd39a" strokeOpacity=".45" strokeWidth="1" />
-              <circle cx="21" cy="7" r="1.9" fill="#d9a06a" />
-              <circle cx="5" cy="18.5" r="1.7" fill="#8fb3a1" />
-              <circle cx="20" cy="19.5" r="1.4" fill="#8fb3a1" />
-              <path d="M13 13 21 7M13 13 5 18.5M13 13 20 19.5" stroke="#8fb3a1" strokeOpacity=".55" strokeWidth=".9" />
-            </svg>
-            <span>
-              <span className="mycelium-brand-name">知识花园</span>
-              <br />
-              <span className="mycelium-brand-sub">Mycelium</span>
-            </span>
-          </Link>
-          <nav className="mycelium-nav">
-            <a href="#network">全部文章</a>
-            <a href="#network">知识群落</a>
-            <Link to="/community">会客厅</Link>
-            <Link to="/guestbook">留言板</Link>
-            <Link to="/login" className="mycelium-admin-link">
-              进入工作台
-              <IconArrowRight size="small" />
-            </Link>
-          </nav>
-        </header>
+        <PublicNav active="blog" isLoggedIn={!!auth.user} />
 
         <section className="mycelium-hero">
           <MyceliumCanvas focusCategory={taxon} categories={topicNames} />

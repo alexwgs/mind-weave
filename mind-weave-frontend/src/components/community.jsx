@@ -1,7 +1,8 @@
-import { Link } from 'react-router-dom'
-import { Avatar, Button, Input, Tag, TextArea } from '@douyinfe/semi-ui'
-import { IconArrowRight, IconComment, IconMail, IconSend, IconUserGroup } from '@douyinfe/semi-icons'
+import { useRef, useState } from 'react'
+import { Avatar, Button, Image, Input, Modal, Tag, TextArea, Tooltip } from '@douyinfe/semi-ui'
+import { IconAt, IconClose, IconDelete, IconExpand, IconExternalOpen, IconImage, IconMinus, IconPlus, IconReply, IconSend, IconUpload, IconVideo } from '@douyinfe/semi-icons'
 import dayjs from 'dayjs'
+import PublicNav from './PublicNav'
 
 /** 相对时间：会客厅是当下的对话，用"几分钟前"比时间戳更贴合语境 */
 export function relativeTime(value) {
@@ -85,45 +86,9 @@ export function groupMessages(messages, viewer) {
   return blocks
 }
 
-export function BrandGlyph() {
-  return (
-    <svg width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true">
-      <circle cx="13" cy="13" r="2.6" fill="#4fd39a" />
-      <circle cx="13" cy="13" r="6.2" stroke="#4fd39a" strokeOpacity=".45" strokeWidth="1" />
-      <circle cx="21" cy="7" r="1.9" fill="#d9a06a" />
-      <circle cx="5" cy="18.5" r="1.7" fill="#8fb3a1" />
-      <circle cx="20" cy="19.5" r="1.4" fill="#8fb3a1" />
-      <path d="M13 13 21 7M13 13 5 18.5M13 13 20 19.5" stroke="#8fb3a1" strokeOpacity=".55" strokeWidth=".9" />
-    </svg>
-  )
-}
-
 /** 公开站点的顶部导航，会客厅与留言板互相可达 */
 export function CommunityTopbar({ active, isLoggedIn }) {
-  return (
-    <header className="community-topbar">
-      <Link to="/blog" className="community-brand" aria-label="回到知识花园">
-        <BrandGlyph />
-        <span>
-          <span className="community-brand-name">织友会客厅</span>
-          <span className="community-brand-sub">PUBLIC COMMONS</span>
-        </span>
-      </Link>
-      <nav className="community-nav">
-        <Link to="/blog">知识花园</Link>
-        <Link to="/community" className={active === 'community' ? 'is-active' : ''}>
-          <IconComment size="small" /> 会客厅
-        </Link>
-        <Link to="/guestbook" className={active === 'guestbook' ? 'is-active' : ''}>
-          <IconMail size="small" /> 留言板
-        </Link>
-        <Link to={isLoggedIn ? '/home' : '/login'} className="community-admin-link">
-          {isLoggedIn ? '回到工作台' : '登录'}
-          <IconArrowRight size="small" />
-        </Link>
-      </nav>
-    </header>
-  )
+  return <PublicNav active={active} isLoggedIn={isLoggedIn} />
 }
 
 /** 在线成员列表（数据来自 SSE 帧，不需要单独轮询） */
@@ -148,8 +113,44 @@ export function ViewerList({ viewers, selfId }) {
   )
 }
 
+/** 聊天内容只解析受控的 @提及和本站附件标记，普通文字始终由 React 转义。 */
+export function ChatContent({ content }) {
+  const [preview, setPreview] = useState(null)
+  const [zoom, setZoom] = useState(1)
+  const quote = String(content || '').match(/^> \[引用 ([^\]#]+)#(\d+)\] ([^\n]*)\n\n?([\s\S]*)$/)
+  if (quote) return <><div className="community-quote"><strong>回复 {quote[1]}</strong><span>{quote[3]}</span></div><ChatContent content={quote[4]} /></>
+  const pattern = /(@video\[[^\]]*\]\(attachment:\d+(?:\s+"size=\d+")?\)|!?\[[^\]]*\]\(attachment:\d+(?:\s+"size=\d+")?\)|@[\w\u3400-\u9fff-]{1,24})/g
+  const nodes = String(content || '').split(pattern).filter(Boolean).map((part, index) => {
+    const video = part.match(/^@video\[([^\]]*)\]\(attachment:(\d+)(?:\s+"size=(\d+)")?\)$/)
+    if (video) {
+      const [, label, id, size] = video
+      const src = `/api/tool/attachments/${id}/content`
+      return <MediaCard key={`${id}-${index}`} type="video" src={src} label={label || '聊天视频'} size={size} onPreview={() => { setZoom(1); setPreview({ type: 'video', src, label: label || '聊天视频' }) }} />
+    }
+    const attachment = part.match(/^(!?)\[([^\]]*)\]\(attachment:(\d+)(?:\s+"size=(\d+)")?\)$/)
+    if (attachment) {
+      const [, image, label, id, size] = attachment
+      if (image) {
+        const src = `/api/tool/attachments/${id}/content`
+        return <MediaCard key={`${id}-${index}`} type="image" src={src} label={label || '聊天图片'} />
+      }
+      const meta = size ? `${(Number(size) / 1024 / 1024).toFixed(1)} MB` : '下载文件'
+      return <a className="community-file" href={`/api/tool/attachments/${id}/download`} download key={`${id}-${index}`}><span>↗</span><b>{label || '附件'}</b><small>{meta}</small></a>
+    }
+    if (part.startsWith('@')) return <mark className="community-mention" key={`${part}-${index}`}>{part}</mark>
+    return part
+  })
+  return <>{nodes}<Modal className="community-media-modal" visible={!!preview} footer={null} centered closeOnEsc maskClosable onCancel={() => setPreview(null)} title={preview?.label}>{preview && <div className="community-media-preview"><div className="community-media-viewport"><video src={preview.src} controls autoPlay playsInline style={{ transform: `scale(${zoom})` }} /></div><div className="community-media-preview-tools"><div><Button size="small" theme="borderless" icon={<IconMinus />} disabled={zoom <= .5} onClick={() => setZoom((value) => Math.max(.5, +(value - .25).toFixed(2)))} aria-label="缩小" /><span>{Math.round(zoom * 100)}%</span><Button size="small" theme="borderless" icon={<IconPlus />} disabled={zoom >= 3} onClick={() => setZoom((value) => Math.min(3, +(value + .25).toFixed(2)))} aria-label="放大" /><Button size="small" theme="borderless" onClick={() => setZoom(1)}>适应窗口</Button></div><a href={preview.src} target="_blank" rel="noreferrer"><IconExternalOpen /> 在新页面打开</a></div></div>}</Modal></>
+}
+
+function MediaCard({ type, src, label, size, onPreview }) {
+  const meta = size ? `${(Number(size) / 1024 / 1024).toFixed(1)} MB` : ''
+  const imagePreview = { previewTitle: label, zoomStep: .25, minZoom: .1, maxZoom: 5, maskClosable: true, closeOnEsc: true, zoomInTip: '放大', zoomOutTip: '缩小', rotateTip: '旋转', adaptiveTip: '适应窗口', originTip: '原始尺寸', downloadTip: '下载' }
+  return <figure className={`community-media is-${type}`}><div className="community-media-frame">{type === 'image' ? <Image src={src} alt={label} width="100%" preview={imagePreview} imgStyle={{ maxHeight: 360, objectFit: 'contain' }} /> : <video src={src} controls preload="metadata" playsInline />}{type === 'video' && <button type="button" className="community-media-expand" onClick={onPreview} aria-label={`放大预览 ${label}`}><IconExpand /></button>}</div><figcaption><span><b>{label}</b>{meta && <small>{meta}</small>}</span><a href={src} target="_blank" rel="noreferrer" aria-label={`在新页面打开 ${label}`}><IconExternalOpen /> 新页面</a></figcaption></figure>
+}
+
 /** IM 风格的对话流：自己的消息右对齐，连续发言合并气泡 */
-export function ChatStream({ messages, viewer, typing, emptyHint }) {
+export function ChatStream({ messages, viewer, typing, emptyHint, onQuote, canDelete = false, onDelete }) {
   const blocks = groupMessages(messages, viewer)
   return (
     <div className="community-chat">
@@ -165,9 +166,10 @@ export function ChatStream({ messages, viewer, typing, emptyHint }) {
               <div className="community-msg-head">
                 <strong>{block.authorName}</strong>
                 {block.authorType === 'USER' && <Tag size="small" color="green">成员</Tag>}
+                {block.authorType === 'AI' && <Tag size="small" color="violet">AI</Tag>}
                 <time>{bubbleTime(block.createdAt)}</time>
               </div>
-              {block.items.map((item) => <p className="community-bubble" key={item.id}>{item.content}</p>)}
+              {block.items.map((item) => <div className="community-bubble-wrap" key={item.id}><div className="community-bubble"><ChatContent content={item.content} /></div><div className="community-message-actions"><button type="button" className="community-reply" onClick={() => onQuote?.(item)} aria-label={`引用 ${block.authorName} 的消息`}><IconReply /></button>{canDelete && <button type="button" className="community-reply is-delete" onClick={() => onDelete?.(item)} aria-label={`删除 ${block.authorName} 的消息`}><IconDelete /></button>}</div></div>)}
             </div>
           </div>
         ))}
@@ -206,10 +208,20 @@ export function Post({ item, variant = 'chat', mine = false, pending = false }) 
 /** 发言区：会客厅即时公开，留言板先审后发 */
 export function Composer({
   value, onChange, nickname, onNicknameChange, user, sending, onSend, onTyping,
-  maxLength, placeholder, reviewNote, actionLabel = '提交', sticky = false, disabled = false
+  maxLength, placeholder, reviewNote, actionLabel = '提交', sticky = false, disabled = false,
+  viewers = [], aiAgents = [], onUpload, uploading = false, replyTo, onCancelReply
 }) {
+  const [emojiOpen, setEmojiOpen] = useState(false)
+  const [mentionOpen, setMentionOpen] = useState(false)
+  const fileRef = useRef(null)
   const isLoggedIn = !!user
   const displayName = user?.displayName || user?.username || (nickname || '').trim()
+  const mentionOptions = isLoggedIn ? [...aiAgents.map((agent) => ({ ...agent, ai: true })), ...viewers] : viewers
+  const emojis = ['😀', '😄', '😂', '🤣', '😊', '🥰', '😍', '😘', '😎', '🤓', '🤔', '🫡', '🤩', '🥳', '😴', '😭', '😤', '😡', '😱', '🤯', '🥺', '😅', '🙃', '😉', '👍', '👎', '👏', '🙌', '🤝', '🙏', '💪', '👌', '✌️', '🤞', '👀', '❤️', '💜', '💚', '💯', '🔥', '✨', '🎉', '🎈', '✅', '❌', '💡', '🚀', '☕', '🍵', '🍄', '🌱', '🌿', '🌸', '🌙', '☀️', '📚']
+  const insert = (text) => {
+    onChange(`${value}${value && !value.endsWith(' ') ? ' ' : ''}${text}`)
+    onTyping?.()
+  }
   const submitOnEnter = (event) => {
     if (event.key !== 'Enter' || event.shiftKey) return
     event.preventDefault()
@@ -223,6 +235,7 @@ export function Composer({
           ? <span><strong>{displayName}</strong><small>已登录 · 以成员身份发言</small></span>
           : <Input value={nickname} onChange={onNicknameChange} maxLength={24} placeholder="游客昵称（2-24 个字符）" aria-label="游客昵称" />}
       </div>
+      {replyTo && <div className="community-compose-quote"><span><strong>回复 {replyTo.authorName}</strong>{replyTo.content.replace(/^> \[引用[^\n]*\]\s*/, '').slice(0, 100)}</span><button type="button" onClick={onCancelReply} aria-label="取消引用"><IconClose /></button></div>}
       <TextArea
         value={value}
         onChange={(next) => { onChange(next); onTyping?.() }}
@@ -233,6 +246,21 @@ export function Composer({
         disabled={disabled}
         aria-label="发言内容"
       />
+      <div className="community-compose-tools">
+        <div className="community-tool-wrap">
+          <Tooltip content="表情"><button type="button" className="community-tool" onClick={() => { setEmojiOpen(!emojiOpen); setMentionOpen(false) }} aria-label="选择表情">☺</button></Tooltip>
+          {emojiOpen && <div className="community-picker emoji-picker">{emojis.map((emoji) => <button type="button" key={emoji} onClick={() => { insert(emoji); setEmojiOpen(false) }}>{emoji}</button>)}</div>}
+        </div>
+        <div className="community-tool-wrap">
+          <Tooltip content="@ 在线成员"><button type="button" className="community-tool" onClick={() => { setMentionOpen(!mentionOpen); setEmojiOpen(false) }} aria-label="提及成员"><IconAt /></button></Tooltip>
+          {mentionOpen && <div className="community-picker mention-picker"><span>提及在线成员</span>{mentionOptions.length ? mentionOptions.map((viewer) => <button type="button" className={viewer.ai ? 'is-ai' : ''} key={viewer.id} onClick={() => { insert(`@${viewer.name} `); setMentionOpen(false) }}><Avatar size="extra-small" color={viewer.ai ? 'violet' : undefined} className={viewer.ai ? undefined : avatarTone(viewer.name)}>{viewer.ai ? '梦' : viewer.name.slice(0, 1)}</Avatar><b>{viewer.name}</b>{viewer.ai && <small>AI</small>}</button>) : <small>暂时没有在线成员</small>}</div>}
+        </div>
+        <Tooltip content="发送图片"><button type="button" className="community-tool" disabled={disabled || uploading} onClick={() => { fileRef.current.accept = 'image/*'; fileRef.current.click() }} aria-label="发送图片"><IconImage /></button></Tooltip>
+        <Tooltip content="发送视频（最大 80MB）"><button type="button" className="community-tool" disabled={disabled || uploading} onClick={() => { fileRef.current.accept = 'video/mp4,video/webm,video/quicktime,video/x-m4v,video/ogg'; fileRef.current.click() }} aria-label="发送视频"><IconVideo /></button></Tooltip>
+        <Tooltip content="发送文件"><button type="button" className="community-tool" disabled={disabled || uploading} onClick={() => { fileRef.current.accept = '.pdf,.txt,.md,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.rar,.7z'; fileRef.current.click() }} aria-label="发送文件"><IconUpload /></button></Tooltip>
+        <input ref={fileRef} type="file" hidden onChange={(event) => { const file = event.target.files?.[0]; if (file) onUpload?.(file); event.target.value = '' }} />
+        {uploading && <span className="community-uploading">附件上传中…</span>}
+      </div>
       <div className="community-compose-foot">
         <span>{reviewNote}</span>
         <Button theme="solid" type="primary" loading={sending} disabled={disabled} icon={<IconSend />} onClick={onSend}>{actionLabel}</Button>

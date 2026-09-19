@@ -89,6 +89,55 @@ public class AttachmentService {
         }
     }
 
+    /**
+     * 公开会客厅附件。图片和文档限制为 20MB，视频限制为 80MB；owner 使用登录名或
+     * 游客来源摘要，避免匿名上传混入文章、保险箱的私有附件命名空间。
+     */
+    public TkAttachment uploadCommunity(MultipartFile file, Long roomId, String uploadOwner) {
+        if (file == null || file.isEmpty()) throw new BizException("文件为空");
+        String original = file.getOriginalFilename() == null ? "file" : file.getOriginalFilename();
+        String lower = original.toLowerCase();
+        String mime = file.getContentType() == null ? "" : file.getContentType().toLowerCase();
+        boolean image = mime.startsWith("image/") && !mime.contains("svg");
+        boolean video = mime.startsWith("video/") && lower.matches(".*\\.(mp4|webm|mov|m4v|ogv)$");
+        boolean document = lower.matches(".*\\.(pdf|txt|md|doc|docx|xls|xlsx|ppt|pptx|zip|rar|7z)$");
+        if (!image && !video && !document) throw new BizException("仅支持常见图片、MP4/WebM/MOV 视频和文档附件");
+        long max = video ? 80L * 1024 * 1024 : 20L * 1024 * 1024;
+        if (file.getSize() > max) throw new BizException(video ? "会客厅视频不能超过 80MB" : "会客厅附件不能超过 20MB");
+
+        String ext = "";
+        int dot = original.lastIndexOf('.');
+        if (dot >= 0) ext = original.substring(dot).toLowerCase();
+        String stored = UUID.randomUUID().toString().replace("-", "") + ext;
+        String sub = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMM"));
+        try {
+            Path dir = Paths.get(props.getUploadDir(), "chat", sub).toAbsolutePath().normalize();
+            Files.createDirectories(dir);
+            Path target = dir.resolve(stored);
+            file.transferTo(target.toFile());
+            TkAttachment a = new TkAttachment();
+            a.setOwner(uploadOwner);
+            a.setBizType("CHAT");
+            a.setBizId(roomId);
+            a.setOriginalName(original);
+            a.setStoredName(stored);
+            a.setStoragePath(target.toString());
+            a.setMime(file.getContentType());
+            a.setSizeBytes(file.getSize());
+            if (image) {
+                try {
+                    BufferedImage img = ImageIO.read(target.toFile());
+                    if (img != null) { a.setWidth(img.getWidth()); a.setHeight(img.getHeight()); }
+                } catch (Exception ignored) { }
+            }
+            a.setCreatedAt(LocalDateTime.now());
+            attachmentMapper.insert(a);
+            return a;
+        } catch (Exception e) {
+            throw new BizException("上传失败: " + e.getMessage());
+        }
+    }
+
     public List<TkAttachment> list(String bizType, Long bizId) {
         String type = (bizType == null || bizType.isBlank()) ? "ARTICLE" : bizType.toUpperCase();
         return attachmentMapper.selectList(new LambdaQueryWrapper<TkAttachment>()
@@ -103,7 +152,7 @@ public class AttachmentService {
         if (a == null) throw new BizException("附件不存在");
         // 文章附件与 content 同样公开：公开文章里的下载链接由浏览器直接发起，带不上 Authorization 头。
         // 保险箱等其它类型仍需校验归属。
-        if (!"ARTICLE".equalsIgnoreCase(a.getBizType()) && !a.getOwner().equals(owner())) {
+        if (!isPublicAttachment(a) && !a.getOwner().equals(owner())) {
             throw new BizException("附件不存在");
         }
         return resource(a, "attachment; filename*=UTF-8''" + enc(a.getOriginalName()));
@@ -113,7 +162,7 @@ public class AttachmentService {
         TkAttachment a = attachmentMapper.selectById(id);
         if (a == null) throw new BizException("附件不存在");
         // 文章类附件（正文图片/视频/封面）允许公开访问，供浏览器 <img>/<video> 直接加载
-        if (!"ARTICLE".equalsIgnoreCase(a.getBizType())) {
+        if (!isPublicAttachment(a)) {
             if (!a.getOwner().equals(owner())) throw new BizException("附件不存在");
         }
         return resource(a, "inline");
@@ -170,6 +219,10 @@ public class AttachmentService {
         String name = a.getOriginalName() != null ? a.getOriginalName() : a.getStoredName();
         return MediaTypeFactory.getMediaType(name == null ? "" : name)
                 .orElse(MediaType.APPLICATION_OCTET_STREAM);
+    }
+
+    private static boolean isPublicAttachment(TkAttachment a) {
+        return "ARTICLE".equalsIgnoreCase(a.getBizType()) || "CHAT".equalsIgnoreCase(a.getBizType());
     }
 
     private void deleteFile(TkAttachment a) {

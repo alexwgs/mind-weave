@@ -356,6 +356,26 @@
   .knowledge-reader-tools { flex-direction: column; align-items: stretch; }
 }
 
+/* 公开文章详情与工作台共用明暗主题，不再强制使用旧版菌床暗色。 */
+.knowledge-public { --my-bed: var(--app-bg); --my-ink: var(--app-ink); --my-spore: var(--app-ink); --my-muted: var(--app-muted); --my-glow: var(--app-primary); --my-tan: var(--app-accent); background: var(--app-bg); color: var(--app-ink); }
+.knowledge-public .knowledge-reading-paper { background: var(--app-surface); border-color: var(--app-border); box-shadow: var(--app-shadow); }
+.knowledge-public .knowledge-reading-summary { color: var(--app-muted); background: var(--app-lilac); border-left-color: var(--app-primary); }
+.knowledge-public .knowledge-prose { color: var(--app-ink); }
+.knowledge-public .knowledge-prose h1,
+.knowledge-public .knowledge-prose h2,
+.knowledge-public .knowledge-prose h3,
+.knowledge-public .knowledge-prose h4,
+.knowledge-public .knowledge-prose strong { color: var(--app-ink); }
+.knowledge-public .knowledge-prose h2 { border-bottom-color: var(--app-border); }
+.knowledge-public .knowledge-prose a { color: var(--app-primary); }
+.knowledge-public .knowledge-prose code { color: var(--app-primary); background: var(--app-lilac); border-color: var(--app-border); }
+.knowledge-public .knowledge-reading-paper .knowledge-prose blockquote { color: var(--app-muted) !important; background: var(--app-bg) !important; border-color: var(--app-border); border-left-color: var(--app-primary); }
+.knowledge-public .knowledge-prose th, .knowledge-public .knowledge-prose td { border-color: var(--app-border); }
+.knowledge-public .knowledge-prose th, .knowledge-public .knowledge-prose tbody tr:nth-child(even) { color: var(--app-ink); background: var(--app-bg); }
+.knowledge-public .knowledge-prose .knowledge-file, .knowledge-public .knowledge-toc, .knowledge-public .knowledge-locked { background: var(--app-bg); border-color: var(--app-border); }
+.knowledge-public .knowledge-prose .knowledge-file-name, .knowledge-public .knowledge-locked h2 { color: var(--app-ink); }
+.knowledge-public .knowledge-toc nav button:hover, .knowledge-public .knowledge-toc nav button.is-active { color: var(--app-primary); background: var(--app-lilac); }
+
 /* --------------------------------------------- 文章库（知识花园后台） --- */
 .knowledge-workspace { padding-bottom: 20px; }
 .knowledge-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
@@ -539,6 +559,11 @@
 
 .knowledge-shelf { min-width: 0; }
 
+.knowledge-floating-actions { position: fixed; right: clamp(16px, 3vw, 36px); bottom: clamp(20px, 4vh, 38px); z-index: 70; display: flex; flex-direction: column; gap: 9px; }
+.knowledge-floating-actions button { display: flex; align-items: center; justify-content: center; gap: 7px; min-width: 58px; height: 42px; padding: 0 12px; color: var(--app-muted); background: color-mix(in srgb, var(--app-surface) 94%, transparent); border: 1px solid var(--app-border); border-radius: 12px; box-shadow: var(--app-shadow); backdrop-filter: blur(12px); cursor: pointer; transition: color .18s, border-color .18s, background .18s, transform .18s; }
+.knowledge-floating-actions button:hover, .knowledge-floating-actions button:focus-visible { color: var(--app-primary); background: var(--app-lilac); border-color: color-mix(in srgb, var(--app-primary) 50%, var(--app-border)); transform: translateY(-2px); outline: none; }
+.knowledge-floating-actions button span { font-size: 11px; font-weight: 600; }
+
 @media (max-width: 991px) {
   .knowledge-library { grid-template-columns: minmax(0, 1fr); }
   .knowledge-sidebar { position: static; }
@@ -546,6 +571,13 @@
 @media (max-width: 700px) {
   .knowledge-heading h1 { font-size: 23px; }
   .knowledge-card-grid { grid-template-columns: 1fr; }
+  .knowledge-floating-actions { right: 12px; bottom: 18px; }
+  .knowledge-floating-actions button { min-width: 42px; width: 42px; padding: 0; border-radius: 50%; }
+  .knowledge-floating-actions button span { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .knowledge-floating-actions button { transition: none; }
 }
 
 /* --------------------------------------------------------------- 编辑器 --- */
