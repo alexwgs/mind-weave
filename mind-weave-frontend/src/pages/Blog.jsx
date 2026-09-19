@@ -150,6 +150,7 @@ export default function Blog() {
             <a href="#network">全部文章</a>
             <a href="#network">知识群落</a>
             <Link to="/community">会客厅</Link>
+            <Link to="/guestbook">留言板</Link>
             <Link to="/login" className="mycelium-admin-link">
               进入工作台
               <IconArrowRight size="small" />

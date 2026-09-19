@@ -24,6 +24,7 @@ import Home from './pages/Home'
 import LifeRpg from './pages/LifeRpg'
 import ApiManager from './pages/ApiManager'
 import Community from './pages/Community'
+import Guestbook from './pages/Guestbook'
 import CommunityAdmin from './pages/CommunityAdmin'
 
 class ErrorBoundary extends Component {
@@ -108,6 +109,7 @@ export default function App() {
         <Route path="/blog" element={<Blog />} />
         <Route path="/blog/:id" element={<BlogView />} />
         <Route path="/community" element={<Community />} />
+        <Route path="/guestbook" element={<Guestbook />} />
         <Route path="*" element={<Navigate to="/home" replace />} />
       </Routes>
     </ErrorBoundary>

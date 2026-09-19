@@ -1,86 +1,165 @@
+/* ============================================================
+   织友会客厅 / 留言板 · 公开互动
+   设计语言统一到主页 workspace.css：紫主色 + 柔和圆角卡片 + 元信息小字
+   ============================================================ */
+
 .community-page {
-  --commons-ink: #172721;
-  --commons-green: #277b5b;
-  --commons-mint: #dff1e8;
-  --commons-paper: #f5f7f1;
-  --commons-clay: #bd714e;
+  /* 与 workspace.css 保持一致的设计令牌，公开页不依赖 .workspace-root 作用域 */
+  --app-primary: #6554d9;
+  --app-accent: #f18b75;
+  --app-mint: #d8f1e5;
+  --app-lilac: #eee9ff;
+  --app-peach: #fff0e9;
+  --app-bg: #f6f7fb;
+  --app-ink: #25304a;
+  --app-muted: #747d91;
+  --app-border: #e8eaf1;
+  --app-surface: #fff;
+  --app-radius: 18px;
+  --app-shadow: 0 4px 24px #2b315006;
+  --app-display: 'Trebuchet MS', 'Microsoft YaHei UI', 'PingFang SC', sans-serif;
+
   min-height: 100vh;
-  color: var(--commons-ink);
-  background:
-    radial-gradient(circle at 12% 4%, rgba(93, 161, 125, .16), transparent 27rem),
-    linear-gradient(120deg, rgba(255,255,255,.68), transparent 42%), var(--commons-paper);
-  font-family: Inter, "PingFang SC", sans-serif;
+  background: var(--app-bg);
+  color: var(--app-ink);
+  font-family: 'PingFang SC', 'HarmonyOS Sans SC', 'Microsoft YaHei', 'Segoe UI', system-ui, sans-serif;
 }
 
-.community-header {
-  min-height: 168px;
-  display: grid;
-  grid-template-columns: 180px minmax(0, 1fr) 180px;
-  align-items: center;
-  gap: 28px;
-  max-width: 1180px;
-  margin: auto;
-  padding: 30px 28px 22px;
-  box-sizing: border-box;
-  border-bottom: 1px solid rgba(23, 39, 33, .14);
-}
+.community-shell { max-width: 1180px; margin: 0 auto; padding: 26px 28px 64px; }
+.community-page ::selection { background: #6554d92b; }
+.community-page :focus-visible { outline: 2px solid var(--app-primary); outline-offset: 2px; border-radius: 6px; }
 
-.community-header > div { text-align: center; }
-.community-header h1 { margin: 4px 0 6px; font: 600 clamp(30px, 5vw, 52px)/1.05 "Noto Serif SC", STSong, serif; letter-spacing: .08em; }
-.community-header p { margin: 0; color: #65746d; }
-.community-header > div > span { color: var(--commons-clay); font-size: 11px; letter-spacing: .24em; }
-.community-back, .community-account { color: var(--commons-ink); text-decoration: none; display: inline-flex; gap: 7px; align-items: center; font-size: 13px; }
-.community-account { justify-self: end; border-bottom: 1px solid currentColor; padding-bottom: 4px; }
+/* ---------- 顶部导航（沿用知识花园的公开站点骨架） ---------- */
+.community-topbar { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 22px; }
+.community-brand { display: inline-flex; align-items: center; gap: 10px; color: var(--app-ink); }
+.community-brand-name { display: block; font-family: var(--app-display); font-size: 15px; letter-spacing: .5px; }
+.community-brand-sub { display: block; color: var(--app-muted); font-size: 10px; letter-spacing: 2px; }
+.community-nav { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.community-nav a { color: var(--app-muted); font-size: 12px; padding: 8px 12px; border-radius: 9px; }
+.community-nav a:hover { color: var(--app-ink); background: #ffffffb0; }
+.community-nav a.is-active { color: var(--app-primary); background: var(--app-lilac); font-weight: 500; }
+.community-nav .community-admin-link { display: inline-flex; align-items: center; gap: 7px; color: #fff; background: var(--app-primary); padding: 9px 15px; }
+.community-nav .community-admin-link:hover { background: #5543c5; color: #fff; }
 
-.community-layout { max-width: 1180px; margin: 0 auto; padding: 32px 28px 64px; display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 44px; }
-.community-rooms { padding-top: 18px; }
-.community-rooms > strong { font-family: "Noto Serif SC", STSong, serif; font-size: 17px; }
-.community-room-rule { display: block; width: 36px; border-top: 2px solid var(--commons-clay); margin: 12px 0 18px; }
-.community-rooms button { width: 100%; display: flex; align-items: flex-start; gap: 12px; padding: 11px 8px; text-align: left; border: 0; border-bottom: 1px solid rgba(23,39,33,.09); background: transparent; color: #66746e; cursor: pointer; }
-.community-rooms button i { width: 7px; height: 7px; margin-top: 6px; border: 1px solid #7f9188; border-radius: 50%; }
-.community-rooms button span { display: flex; flex-direction: column; gap: 3px; font-weight: 600; }
-.community-rooms button small { font-weight: 400; line-height: 1.4; color: #89938f; }
-.community-rooms button.is-active { color: var(--commons-green); }
-.community-rooms button.is-active i { background: var(--commons-green); border-color: var(--commons-green); box-shadow: 0 0 0 5px rgba(39,123,91,.11); }
+/* ---------- 页头 ---------- */
+.community-hero { display: grid; grid-template-columns: minmax(0, 1fr) 268px; align-items: center; gap: 28px; margin-bottom: 24px; }
+.community-hero h1 { font-family: var(--app-display); font-size: clamp(26px, 3vw, 38px); letter-spacing: -1px; line-height: 1.35; margin: 13px 0 12px; }
+.community-hero p { color: var(--app-muted); font-size: 13px; line-height: 1.9; margin: 0; max-width: 52ch; }
+.community-hero .community-hero-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 18px; margin-top: 20px; }
 
-.community-board { min-width: 0; }
-.community-board .semi-tabs-bar { border: 0; margin-bottom: 24px; }
-.community-board-title { display: flex; align-items: end; justify-content: space-between; margin-bottom: 12px; }
-.community-board-title span { color: var(--commons-clay); font-size: 10px; letter-spacing: .2em; }
-.community-board-title h2 { margin: 3px 0 0; font: 600 26px/1.2 "Noto Serif SC", STSong, serif; }
-.community-stream { height: min(48vh, 520px); min-height: 320px; overflow: auto; padding: 8px 14px 8px 0; border-top: 1px solid rgba(23,39,33,.15); border-bottom: 1px solid rgba(23,39,33,.15); scrollbar-color: #a9bcb2 transparent; }
-.community-stream > .semi-spin { display: block; margin: 100px auto; }
-.community-post { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 12px; padding: 17px 5px; border-bottom: 1px dashed rgba(23,39,33,.12); }
-.community-post.is-pending { background: linear-gradient(90deg, rgba(229, 178, 105, .12), transparent); }
-.community-post-meta { display: flex; align-items: center; gap: 8px; min-width: 0; }
-.community-post-meta strong { font-size: 13px; }
-.community-post-meta time { margin-left: auto; color: #89938f; font-size: 11px; }
-.community-post p { margin: 6px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.7; }
-.community-stream.is-guestbook .community-post { margin: 12px 0; padding: 18px; background: rgba(255,255,255,.65); border: 1px solid rgba(39,123,91,.13); border-radius: 3px 18px 3px 3px; }
+.community-status { display: inline-flex; align-items: center; gap: 8px; font-size: 11px; color: var(--app-muted); }
+.community-status i { width: 7px; height: 7px; border-radius: 50%; background: var(--app-primary); box-shadow: 0 0 0 4px #6554d91f; }
+.community-status.is-live i { background: #43ab7f; box-shadow: 0 0 0 4px #43ab7f22; animation: community-pulse 2.6s ease-out infinite; }
+@keyframes community-pulse { 0% { box-shadow: 0 0 0 0 #43ab7f3d; } 70% { box-shadow: 0 0 0 9px #43ab7f00; } 100% { box-shadow: 0 0 0 0 #43ab7f00; } }
 
-.community-composer { margin-top: 18px; padding: 18px; background: rgba(255,255,255,.76); border: 1px solid rgba(23,39,33,.13); box-shadow: 0 16px 40px rgba(37,68,55,.07); }
+/* 页头右侧的贴纸卡，呼应主页手帐封面 */
+.community-hero-card { position: relative; padding: 24px 22px; background: var(--app-lilac); border: 1px solid #6554d91f; border-radius: 6px 18px 18px 6px; border-left: 8px solid #b6a7e9; box-shadow: 8px 10px 0 #6554d90b; transform: rotate(-2deg); }
+.community-hero-card strong { display: block; font-family: var(--app-display); font-size: 16px; letter-spacing: 1px; margin-bottom: 14px; }
+.community-hero-card p { font-size: 11px; line-height: 1.9; color: var(--app-muted); margin: 0; }
+.community-hero-card .community-hero-spark { position: absolute; top: -12px; right: -8px; color: var(--app-accent); font-size: 22px; }
+
+/* ---------- 主体三栏 / 两栏 ---------- */
+.community-main { display: grid; align-items: start; gap: 22px; }
+.community-main.is-chat { grid-template-columns: 214px minmax(0, 1fr) 236px; }
+.community-main.is-guestbook { grid-template-columns: minmax(0, 1fr) 268px; max-width: 1040px; margin: 0 auto; }
+.community-col { display: flex; flex-direction: column; gap: 22px; min-width: 0; }
+
+/* ---------- 房间列表 ---------- */
+.community-panel { background: var(--app-surface); border: 1px solid var(--app-border); border-radius: var(--app-radius); box-shadow: var(--app-shadow); padding: 20px; min-width: 0; }
+.community-panel-heading { font-family: var(--app-display); font-size: 13px; letter-spacing: .3px; margin-bottom: 14px; }
+.community-room-list { display: flex; flex-direction: column; gap: 4px; }
+.community-room-list button { display: flex; align-items: flex-start; gap: 10px; width: 100%; padding: 11px 12px; text-align: left; border: 1px solid transparent; border-radius: 12px; background: transparent; color: var(--app-ink); cursor: pointer; transition: background .16s, border-color .16s; }
+.community-room-list button:hover { background: var(--app-bg); }
+.community-room-list button.is-active { background: var(--app-lilac); border-color: #6554d92e; }
+.community-room-list button i { flex-shrink: 0; width: 8px; height: 8px; margin-top: 6px; border-radius: 50%; background: #c7cdda; }
+.community-room-list button.is-active i { background: var(--app-primary); box-shadow: 0 0 0 4px #6554d91f; }
+.community-room-list button span { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.community-room-list button strong { font-size: 12.5px; font-weight: 500; }
+.community-room-list button small { font-size: 10px; line-height: 1.6; color: var(--app-muted); }
+.community-rail-empty { font-size: 11px; color: var(--app-muted); line-height: 1.8; }
+
+/* ---------- 面板头 ---------- */
+.community-stream-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 14px; margin-bottom: 16px; }
+.community-stream-head h2 { font-family: var(--app-display); font-size: 19px; letter-spacing: -.3px; margin: 6px 0 0; }
+.community-stream-head .community-head-meta { display: flex; align-items: center; gap: 12px; }
+
+/* ---------- 消息流 ---------- */
+.community-stream { display: flex; flex-direction: column; gap: 12px; max-height: min(56vh, 560px); min-height: 260px; overflow-y: auto; padding: 2px 4px 2px 2px; scrollbar-color: #ccd2de transparent; }
+.community-stream .semi-spin { display: block; margin: 90px auto; }
+.community-post { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 12px; padding: 14px 16px; border-radius: 14px; background: var(--app-bg); border: 1px solid transparent; }
+.community-post:hover { border-color: var(--app-border); }
+.community-post.is-mine { background: var(--app-lilac); border-color: #6554d92e; }
+.community-post-meta { display: flex; align-items: center; gap: 8px; min-width: 0; margin-bottom: 6px; }
+.community-post-meta strong { font-size: 12.5px; font-weight: 500; }
+.community-post-meta time { margin-left: auto; flex-shrink: 0; color: var(--app-muted); font-size: 10.5px; }
+.community-post p { margin: 0; font-size: 13px; line-height: 1.85; white-space: pre-wrap; overflow-wrap: anywhere; }
+
+.community-stream.is-guestbook { gap: 14px; max-height: none; }
+.community-stream.is-guestbook .community-post { position: relative; grid-template-columns: 38px minmax(0, 1fr); padding: 22px 22px 22px 26px; background: var(--app-surface); border: 1px solid var(--app-border); border-radius: var(--app-radius); box-shadow: var(--app-shadow); overflow: hidden; }
+/* 每条留言左侧的一条书签色带：三种低饱和色循环，安静地区分相邻留言 */
+.community-stream.is-guestbook .community-post::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--app-primary); }
+.community-stream.is-guestbook .community-post:nth-child(3n + 1)::before { background: var(--app-primary); }
+.community-stream.is-guestbook .community-post:nth-child(3n + 2)::before { background: #6fb79b; }
+.community-stream.is-guestbook .community-post:nth-child(3n)::before { background: var(--app-accent); }
+
+/* ---------- 输入区 ---------- */
+.community-composer { margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--app-border); }
+.community-composer.is-sticky { position: sticky; bottom: 14px; margin-top: 18px; padding: 18px; border-top: 1px solid var(--app-border); border-radius: var(--app-radius); background: #ffffffeb; backdrop-filter: blur(8px); }
 .community-identity { display: flex; align-items: center; gap: 9px; margin-bottom: 11px; }
-.community-identity > span { display: flex; flex-direction: column; font-size: 12px; }
-.community-identity small { color: #819088; }
+.community-identity > span { display: flex; flex-direction: column; font-size: 12px; min-width: 0; }
+.community-identity strong { font-weight: 500; }
+.community-identity small { color: var(--app-muted); font-size: 10.5px; }
 .community-identity .semi-input-wrapper { max-width: 240px; }
-.community-compose-foot { display: flex; justify-content: space-between; align-items: center; gap: 14px; margin-top: 10px; }
-.community-compose-foot > span { color: #7b8882; font-size: 12px; }
+.community-compose-foot { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-top: 11px; }
+.community-compose-foot > span { font-size: 11px; line-height: 1.7; color: var(--app-muted); }
 
-.article-comments { max-width: 780px; margin: 32px auto 0; padding: 28px; color: var(--commons-ink); background: #f5f7f1; border-top: 3px solid var(--commons-green); }
-.article-comments h2 { font: 600 25px "Noto Serif SC", STSong, serif; margin: 0 0 5px; }
-.article-comments-sub { color: #738079; font-size: 13px; margin: 0 0 20px; }
-.article-comments .community-stream { height: auto; min-height: 100px; max-height: 480px; }
+/* ---------- 空态与提示 ---------- */
+.community-empty { text-align: center; padding: 46px 16px; color: var(--app-muted); }
+.community-empty h3 { font-size: 14px; font-weight: 500; color: var(--app-ink); margin: 14px 0 8px; }
+.community-empty p { font-size: 12px; line-height: 1.9; margin: 0; }
+.community-empty .community-empty-mark { font-size: 34px; color: #9ecdb6; }
+.community-notice { display: flex; align-items: flex-start; gap: 9px; padding: 12px 15px; margin-bottom: 14px; border-radius: 12px; background: var(--app-peach); border: 1px solid #efbea95c; font-size: 11.5px; line-height: 1.8; color: #8a5a45; }
+.community-rail-list { display: flex; flex-direction: column; gap: 12px; font-size: 11.5px; line-height: 1.8; color: var(--app-muted); }
+.community-rail-list b { color: var(--app-ink); font-weight: 500; }
+.community-rail .community-rail-rule { display: block; height: 2px; width: 34px; background: var(--app-accent); border-radius: 2px; margin: 13px 0 15px; }
 
-@media (max-width: 720px) {
-  .community-header { grid-template-columns: 1fr auto; padding: 20px 18px; }
-  .community-header > div { grid-column: 1 / -1; grid-row: 2; text-align: left; }
-  .community-header h1 { font-size: 34px; }
-  .community-layout { grid-template-columns: 1fr; gap: 18px; padding: 18px 14px 40px; }
-  .community-rooms { display: flex; gap: 8px; overflow-x: auto; padding: 0 0 6px; }
-  .community-rooms > strong, .community-room-rule { display: none; }
-  .community-rooms button { min-width: 165px; border: 1px solid rgba(23,39,33,.12); border-radius: 8px; }
-  .community-stream { min-height: 280px; }
+/* ---------- 文章评论（沿用同一套语言） ---------- */
+.article-comments {
+  --app-primary: #6554d9; --app-accent: #f18b75; --app-mint: #d8f1e5; --app-lilac: #eee9ff;
+  --app-peach: #fff0e9; --app-bg: #f6f7fb; --app-ink: #25304a; --app-muted: #747d91;
+  --app-border: #e8eaf1; --app-surface: #fff; --app-radius: 18px; --app-shadow: 0 4px 24px #2b315006;
+  --app-display: 'Trebuchet MS', 'Microsoft YaHei UI', 'PingFang SC', sans-serif;
+  max-width: 780px; margin: 32px auto 0; padding: 28px; color: var(--app-ink); background: var(--app-surface); border: 1px solid var(--app-border); border-top: 3px solid var(--app-primary); border-radius: 14px;
+}
+.article-comments h2 { font-family: var(--app-display); font-size: 20px; margin: 0 0 6px; }
+.article-comments-sub { color: var(--app-muted); font-size: 12px; margin: 0 0 20px; }
+.article-comments .community-stream { max-height: 460px; min-height: 90px; }
+
+/* ---------- 响应式 ---------- */
+@media (max-width: 1080px) {
+  .community-main.is-chat { grid-template-columns: 190px minmax(0, 1fr); }
+  .community-main.is-chat .community-rail { display: none; }
+}
+@media (max-width: 860px) {
+  .community-hero { grid-template-columns: minmax(0, 1fr); }
+  .community-hero-card { display: none; }
+  .community-main.is-chat, .community-main.is-guestbook { grid-template-columns: minmax(0, 1fr); }
+  .community-main.is-guestbook .community-rail { order: 3; }
+  .community-room-list { flex-direction: row; overflow-x: auto; gap: 8px; padding-bottom: 4px; }
+  .community-room-list button { min-width: 170px; border-color: var(--app-border); }
+}
+@media (max-width: 700px) {
+  .community-shell { padding: 18px 16px 48px; }
+  .community-hero h1 { font-size: 27px; }
+  .community-panel { padding: 16px; }
+  .community-stream { max-height: none; min-height: 200px; }
+  .community-composer.is-sticky { position: static; padding: 14px; }
   .community-compose-foot { align-items: flex-end; }
-  .community-compose-foot > span { max-width: 210px; }
-  .article-comments { margin: 20px 10px 0; padding: 20px 14px; }
+  .community-compose-foot > span { max-width: 200px; }
+  .article-comments { margin: 20px 10px 0; padding: 20px 16px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .community-status.is-live i { animation: none; }
+  .community-page * { transition-duration: .01ms !important; }
 }

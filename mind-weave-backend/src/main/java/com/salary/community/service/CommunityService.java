@@ -76,7 +76,8 @@ public class CommunityService {
         item.setRoomId(roomId);
         applyAuthor(item, author);
         item.setContent(content(req, 1000));
-        item.setStatus(PENDING);
+        // 会客厅是当下的对话：发布即公开，不进审核队列，管理员可在后台删除
+        item.setStatus(APPROVED);
         item.setSourceHash(sourceHash(req, http));
         item.setCreatedAt(LocalDateTime.now());
         messageMapper.insert(item);
@@ -151,15 +152,12 @@ public class CommunityService {
     public void review(String type, Long id, String status) {
         permissionService.require("community.manage");
         String normalized = normalizeType(type);
+        if ("CHAT".equals(normalized)) throw new BizException("会客厅消息发布即公开，无需审核，如需处理请直接删除");
         String state = normalizeStatus(status, PENDING);
         if (PENDING.equals(state)) throw new BizException("审核结果必须是通过或拒绝");
         String reviewer = SecurityUtils.currentUsername();
         LocalDateTime now = LocalDateTime.now();
-        if ("CHAT".equals(normalized)) {
-            ChatMessage item = messageMapper.selectById(id);
-            if (item == null) throw new BizException("消息不存在");
-            item.setStatus(state); item.setReviewedBy(reviewer); item.setReviewedAt(now); messageMapper.updateById(item);
-        } else if ("GUESTBOOK".equals(normalized)) {
+        if ("GUESTBOOK".equals(normalized)) {
             GuestbookEntry item = guestbookMapper.selectById(id);
             if (item == null) throw new BizException("留言不存在");
             item.setStatus(state); item.setReviewedBy(reviewer); item.setReviewedAt(now); guestbookMapper.updateById(item);

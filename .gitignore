@@ -71,6 +71,7 @@ mind-weave-miniprogram/project.private.config.json
 
 # ---------- 本地备份 / 工具缓存 ----------
 .codex/miniprogram-git-backup/
+.codex/ui-preview/
 .cache/
 
 # ---------- 操作系统 ----------

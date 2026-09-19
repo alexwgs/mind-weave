@@ -7,7 +7,7 @@ import { communityApi } from '../api'
 const { TabPane } = Tabs
 const { Text } = Typography
 const TYPES = [
-  { value: 'CHAT', label: '聊天室消息' },
+  { value: 'CHAT', label: '会客厅消息' },
   { value: 'GUESTBOOK', label: '留言板' },
   { value: 'ARTICLE', label: '文章评论' }
 ]
@@ -23,11 +23,13 @@ export default function CommunityAdmin() {
   const [roomVisible, setRoomVisible] = useState(false)
   const [roomForm, setRoomForm] = useState({ name: '', description: '', sortOrder: 0 })
   const roomNames = useMemo(() => Object.fromEntries(rooms.map((room) => [room.id, room.name])), [rooms])
+  const isChat = type === 'CHAT'
 
   const loadRows = async () => {
     setLoading(true)
     try {
-      const page = await communityApi.moderation({ type, status, page: 1, size: 100 })
+      // 会客厅消息发布即公开，不进审核队列，因此固定按「全部」拉取
+      const page = await communityApi.moderation({ type, status: isChat ? 'ALL' : status, page: 1, size: 100 })
       setRows(page.records || [])
     } finally { setLoading(false) }
   }
@@ -48,8 +50,8 @@ export default function CommunityAdmin() {
     { title: '位置', width: 130, render: (_, row) => type === 'CHAT' ? (roomNames[row.roomId] || `房间 #${row.roomId}`) : type === 'ARTICLE' ? `文章 #${row.articleId}` : '留言板' },
     { title: '内容', dataIndex: 'content', render: (value) => <div style={{ whiteSpace: 'pre-wrap', minWidth: 220 }}>{value}</div> },
     { title: '提交时间', dataIndex: 'createdAt', width: 150, render: (value) => dayjs(value).format('MM-DD HH:mm') },
-    { title: '状态', dataIndex: 'status', width: 90, render: (value) => <Tag color={STATUS[value]?.[0] || 'grey'}>{STATUS[value]?.[1] || value}</Tag> },
-    { title: '操作', width: 184, fixed: 'right', render: (_, row) => <Space spacing="tight"><Button size="small" type="primary" icon={<IconTick />} disabled={row.status === 'APPROVED'} onClick={() => review(row, 'APPROVED')}>通过</Button><Button size="small" icon={<IconClose />} disabled={row.status === 'REJECTED'} onClick={() => review(row, 'REJECTED')}>拒绝</Button><Button size="small" theme="borderless" type="danger" icon={<IconDelete />} aria-label="删除" onClick={() => remove(row)} /></Space> }
+    { title: '状态', dataIndex: 'status', width: 90, render: (value) => isChat ? <Tag color="green">已公开</Tag> : <Tag color={STATUS[value]?.[0] || 'grey'}>{STATUS[value]?.[1] || value}</Tag> },
+    { title: '操作', width: isChat ? 92 : 184, fixed: 'right', render: (_, row) => <Space spacing="tight">{!isChat && <><Button size="small" type="primary" icon={<IconTick />} disabled={row.status === 'APPROVED'} onClick={() => review(row, 'APPROVED')}>通过</Button><Button size="small" icon={<IconClose />} disabled={row.status === 'REJECTED'} onClick={() => review(row, 'REJECTED')}>拒绝</Button></>}<Button size="small" theme="borderless" type="danger" icon={<IconDelete />} aria-label="删除" onClick={() => remove(row)} /></Space> }
   ]
 
   const createRoom = async () => {
@@ -65,9 +67,9 @@ export default function CommunityAdmin() {
           <Card>
             <Space wrap style={{ marginBottom: 16 }}>
               <Select value={type} onChange={setType} optionList={TYPES} style={{ width: 160 }} />
-              <Select value={status} onChange={setStatus} optionList={[{ value: 'PENDING', label: '待审核' }, { value: 'APPROVED', label: '已通过' }, { value: 'REJECTED', label: '已拒绝' }, { value: 'ALL', label: '全部' }]} style={{ width: 130 }} />
+              {!isChat && <Select value={status} onChange={setStatus} optionList={[{ value: 'PENDING', label: '待审核' }, { value: 'APPROVED', label: '已通过' }, { value: 'REJECTED', label: '已拒绝' }, { value: 'ALL', label: '全部' }]} style={{ width: 130 }} />}
               <Button icon={<IconRefresh />} onClick={loadRows}>刷新</Button>
-              <Text type="tertiary">提交内容不会直接公开，必须在这里审核通过。</Text>
+              <Text type="tertiary">{isChat ? '会客厅消息发布即公开，无需审核；如内容不合适，可直接删除。' : '提交内容不会直接公开，必须在这里审核通过。'}</Text>
             </Space>
             <Table rowKey="id" columns={columns} dataSource={rows} loading={loading} pagination={false} scroll={{ x: 950 }} />
           </Card>
