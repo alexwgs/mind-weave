@@ -1,0 +1,75 @@
+<view class="rpg-page">
+  <view class="hero">
+    <view class="hero-meta"><text>LIFE RPG / PERSONAL GROWTH</text><text>✦</text></view>
+    <view class="hero-main">
+      <view class="hero-copy"><text class="hero-kicker">当前称号</text><text class="hero-title">{{profile.title || '初醒的织梦人'}}</text><text class="hero-sub">真实行动，正在编织更强的你。</text></view>
+      <view class="level-seal"><text class="level-label">LEVEL</text><text class="level">{{profile.level || 1}}</text></view>
+    </view>
+    <view class="xp-head"><text>距离下一等级</text><text>{{profile.levelXp || 0}} / {{profile.nextLevelXp || 100}} XP</text></view>
+    <view class="xp-track"><view class="xp-fill" style="width: {{xpPercent}}%"></view></view>
+    <view class="hero-stats">
+      <view><text class="num">{{profile.totalXp || 0}}</text><text>总经验</text></view>
+      <view><text class="num">{{profile.bestStreak || 0}}</text><text>最长连击</text></view>
+      <view><text class="num">{{profile.unlockedBadges || 0}}</text><text>已获徽章</text></view>
+    </view>
+  </view>
+
+  <view class="section-head first-section">
+    <view><text class="eyebrow">DAILY THREADS</text><text class="section-title">今天的线索</text></view>
+    <button class="mini-add" bindtap="openCreate">＋ 新习惯</button>
+  </view>
+  <view class="quest-summary {{dailyQuest.complete ? 'complete' : ''}}">
+    <view class="quest-mark">{{dailyQuest.complete ? '✓' : dailyQuest.checkedToday}}</view>
+    <view class="quest-copy"><text class="quest-title">{{dailyQuest.complete ? '今天的习惯全部完成' : dailyQuest.checkedToday + ' / ' + dailyQuest.habitTotal + ' 项习惯已完成'}}</text><text>{{dailyQuest.activeTodos || 0}} 件待办仍在冒险清单中</text></view>
+    <text class="quest-state">{{dailyQuest.complete ? 'PERFECT' : 'TODAY'}}</text>
+  </view>
+
+  <view class="habit-list">
+    <view class="habit tone-{{item.color}} {{item.checkedToday ? 'checked' : ''}}" wx:for="{{habits}}" wx:key="id" data-id="{{item.id}}" data-name="{{item.name}}" bindtap="toggleHabit" bindlongpress="removeHabit">
+      <view class="habit-icon">{{item.checkedToday ? '✓' : item.emoji}}</view>
+      <view class="habit-copy"><text class="habit-title">{{item.name}}</text><text>{{item.streak ? '连续 ' + item.streak + ' 天' : '从今天开始连续记录'}}</text></view>
+      <view class="habit-count"><text class="num">{{item.totalCheckins}}</text><text>次</text></view>
+    </view>
+    <view class="empty" wx:if="{{!habits.length && !loading}}" bindtap="openCreate"><text class="empty-plus">＋</text><text class="empty-title">创建第一个每日习惯</text><text>从一件明天还愿意继续的小事开始</text></view>
+  </view>
+  <view class="gesture-tip" wx:if="{{habits.length}}">轻触打卡 · 长按移除习惯</view>
+
+  <view class="section-head">
+    <view><text class="eyebrow">SKILL CONSTELLATION</text><text class="section-title">能力星图</text></view>
+  </view>
+  <view class="skills">
+    <view class="skill tone-{{item.color}}" wx:for="{{skills}}" wx:key="code">
+      <view class="skill-head"><text class="skill-glyph">{{item.glyph}}</text><text class="skill-level">LV.{{item.level}}</text></view>
+      <text class="skill-name">{{item.name}}</text>
+      <text class="skill-desc">{{item.description}}</text>
+      <view class="skill-track"><view style="width: {{item.levelXp / item.nextLevelXp * 100}}%"></view></view>
+    </view>
+  </view>
+
+  <view class="section-head">
+    <view><text class="eyebrow">ACHIEVEMENT ARCHIVE</text><text class="section-title">成就陈列室</text></view>
+    <text class="count">{{profile.unlockedBadges || 0}} / {{achievements.length}}</text>
+  </view>
+  <scroll-view scroll-x enhanced show-scrollbar="{{false}}" class="badges">
+    <view class="badge {{item.unlocked ? 'unlocked' : ''}} rarity-{{item.rarity || 'common'}}" wx:for="{{achievements}}" wx:key="code">
+      <view class="medal">{{item.glyph}}</view>
+      <text class="badge-name">{{item.name}}</text>
+      <text class="badge-desc">{{item.description}}</text>
+      <text class="badge-state">{{item.unlocked ? '已点亮' : item.current + ' / ' + item.target}}</text>
+    </view>
+  </scroll-view>
+
+  <view class="loading" wx:if="{{loading}}">正在读取成长轨迹…</view>
+
+  <view class="mask" wx:if="{{showCreate}}" bindtap="closeCreate"></view>
+  <view class="creator" wx:if="{{showCreate}}">
+    <view class="sheet-grip"></view>
+    <view class="creator-head"><view><text class="creator-kicker">NEW DAILY THREAD</text><text class="creator-title">添加每日习惯</text></view><text class="creator-close" bindtap="closeCreate">×</text></view>
+    <input class="name-input" maxlength="30" placeholder="例如：阅读 20 分钟" value="{{habitName}}" bindinput="onHabitName" />
+    <view class="label">选择图记</view>
+    <view class="pickers"><text class="emoji {{habitEmoji === item ? 'active' : ''}}" wx:for="{{emojis}}" wx:key="*this" data-value="{{item}}" bindtap="chooseEmoji">{{item}}</text></view>
+    <view class="label">选择织线</view>
+    <view class="pickers"><text class="color tone-{{item}} {{habitColor === item ? 'active' : ''}}" wx:for="{{colors}}" wx:key="*this" data-value="{{item}}" bindtap="chooseColor"></text></view>
+    <view class="creator-actions"><button bindtap="closeCreate">取消</button><button class="primary" loading="{{saving}}" bindtap="createHabit">加入冒险</button></view>
+  </view>
+</view>

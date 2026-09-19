@@ -1,0 +1,49 @@
+<view class="page">
+  <view class="card">
+    <view class="sec-title">Bark 推送</view>
+    <view class="sec-desc">iOS 安装 Bark 后复制推送地址（https://api.day.app/xxxx）。后端每 30 秒检查单次提醒、循环提醒与逾期待办；微信提醒授权可在新建待办时完成。</view>
+    <input class="ipt" placeholder="Bark 推送地址" value="{{barkUrl}}" bindinput="onBark" />
+    <input class="ipt" placeholder="每日汇总时间，如 21:00" value="{{digestTime}}" bindinput="onDigest" />
+    <view class="btn-row">
+      <view class="btn primary" bindtap="save">保存设置</view>
+      <view class="btn ghost" bindtap="testBark">发送测试推送</view>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="sec-title">小程序 PIN 码</view>
+    <view class="sec-desc">查看保险箱明文前需验证 PIN 码（Web 端不受影响）。</view>
+    <input class="ipt" password type="number" placeholder="设置 PIN 码（至少 4 位）" value="{{pin}}" bindinput="onPin" />
+    <input class="ipt" password type="number" placeholder="确认 PIN 码" value="{{pin2}}" bindinput="onPin2" />
+    <view class="btn primary" bindtap="savePin">设置 PIN 码</view>
+  </view>
+
+  <view class="card">
+    <view class="sec-title">收支解锁设置</view>
+    <view class="sec-desc">进入收支仪表盘/收支列表前需要验证（解锁后 10 分钟内免重复验证）。</view>
+    <view class="tag-row">
+      <view class="tag-chip {{uType === 'none' ? 'active' : ''}}" data-v="none" bindtap="onUType">不启用</view>
+      <view class="tag-chip {{uType === 'pin' ? 'active' : ''}}" data-v="pin" bindtap="onUType">6位 PIN</view>
+      <view class="tag-chip {{uType === 'gesture' ? 'active' : ''}}" data-v="gesture" bindtap="onUType">手势解锁</view>
+      <view class="tag-chip {{uType === 'face' ? 'active' : ''}}" data-v="face" bindtap="onUType">人脸/指纹</view>
+    </view>
+    <block wx:if="{{uType === 'pin'}}">
+      <input class="ipt" type="number" maxlength="6" password placeholder="6 位数字 PIN" value="{{uPin}}" bindinput="onUPin" />
+      <input class="ipt" type="number" maxlength="6" password placeholder="再次确认 PIN" value="{{uPin2}}" bindinput="onUPin2" />
+    </block>
+    <block wx:if="{{uType === 'gesture'}}">
+      <view class="sec-desc">绘制解锁手势（至少连接 4 个点）</view>
+      <view class="gesture-grid">
+        <view class="gesture-cell" wx:for="{{[0,1,2,3,4,5,6,7,8]}}" wx:for-item="i" wx:key="*this" data-i="{{i}}" bindtap="onUDotTap">
+          <view class="gesture-dot {{uGestureSet[i] ? 'active' : ''}}"></view>
+        </view>
+      </view>
+      <view class="btn-row">
+        <view class="btn ghost" bindtap="clearUGesture">重画</view>
+        <view class="btn primary" bindtap="confirmUGesture">确认手势</view>
+      </view>
+    </block>
+    <view wx:if="{{uType === 'face'}}" class="sec-desc">使用手机自带的人脸/指纹验证（需设备支持，不支持时可配合 PIN 使用）。</view>
+    <view class="btn primary" bindtap="saveUnlock">保存解锁设置</view>
+  </view>
+</view>

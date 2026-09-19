@@ -1,0 +1,56 @@
+<view class="page">
+  <scroll-view scroll-x class="group-bar">
+    <view class="chip {{groupId === null ? 'active' : ''}}" data-id="" bindtap="onGroup">全部</view>
+    <view class="chip {{groupId === g.id ? 'active' : ''}}" wx:for="{{groups}}" wx:for-item="g" wx:key="id" data-id="{{g.id}}" bindtap="onGroup">{{g.name}}</view>
+  </scroll-view>
+
+  <view class="search-row">
+    <input class="search-input" placeholder="搜索名称/备注" value="{{keyword}}" bindinput="onKeyword" confirm-type="search" bindconfirm="onSearch" />
+    <view class="btn-add" bindtap="openForm">＋新增</view>
+  </view>
+
+  <view class="card item-card" wx:for="{{rows}}" wx:key="id" data-id="{{item.id}}" bindtap="onOpen" bindlongpress="onLongPress">
+    <view class="item-head">
+      <view class="item-name">{{item.name}}</view>
+      <view class="item-group">{{item.groupName}}</view>
+    </view>
+    <view class="item-line">账号：<text class="mask">{{item.accountMasked || '—'}}</text></view>
+    <view class="item-line">密码：<text class="mask">{{item.passwordMasked || '—'}}</text></view>
+    <view class="item-note" wx:if="{{item.note}}">{{item.note}}</view>
+  </view>
+
+  <view class="load-tip">
+    <text wx:if="{{loading}}">加载中…</text>
+    <text wx:elif="{{!hasMore && rows.length}}">没有更多了</text>
+    <text wx:elif="{{!rows.length && !loading}}">暂无凭证，点右上角新增</text>
+  </view>
+
+  <!-- 新增/编辑弹层 -->
+  <view class="mask" wx:if="{{showForm}}" bindtap="closeForm"></view>
+  <view class="sheet" wx:if="{{showForm}}">
+    <view class="sheet-title">{{form.id ? '编辑凭证' : '新增凭证'}}</view>
+    <input class="ipt" placeholder="名称（必填）" value="{{form.name}}" data-k="name" bindinput="onForm" />
+    <picker mode="selector" range="{{groupNames}}" value="{{formGroupIndex}}" bindchange="onFormGroup">
+      <view class="ipt picker">分组：{{groupNames[formGroupIndex]}}</view>
+    </picker>
+    <input class="ipt" placeholder="账号/用户名" value="{{form.account}}" data-k="account" bindinput="onForm" />
+    <view class="pwd-row">
+      <input class="ipt flex1" placeholder="密码" value="{{form.password}}" data-k="password" bindinput="onForm" />
+      <view class="btn-gen" bindtap="onGenPwd">生成</view>
+    </view>
+    <input class="ipt" placeholder="备注" value="{{form.note}}" data-k="note" bindinput="onForm" />
+    <view class="field-title">自定义字段
+      <text class="field-add" bindtap="addField">＋添加</text>
+    </view>
+    <view class="field-row" wx:for="{{form.fields}}" wx:for-item="f" wx:for-index="idx">
+      <input class="ipt flex1" placeholder="字段名" value="{{f.key}}" data-i="{{index}}" data-k="key" bindinput="onField" />
+      <input class="ipt flex1" placeholder="字段值" value="{{f.value}}" data-i="{{index}}" data-k="value" bindinput="onField" />
+      <view class="field-del" data-i="{{index}}" bindtap="removeField">✕</view>
+    </view>
+    <view class="sheet-btns">
+      <view class="btn ghost" bindtap="closeForm">取消</view>
+      <view class="btn primary" bindtap="saveForm">保存</view>
+    </view>
+  </view>
+  <view class="ai-fab" bindtap="openAi">AI</view>
+</view>

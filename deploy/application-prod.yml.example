@@ -1,0 +1,48 @@
+# ============================================================
+# MindWeave · 织脑 - 生产环境配置模板
+# 用法：复制为 deploy/application-prod.yml（该文件已被 .gitignore 忽略），
+#       填好真实凭据后放到 /vol1/1000/dev/mind-weave-backend/application-prod.yml
+#       也可直接用环境变量 SPRING_DATASOURCE_* / SALARY_JWT_SECRET / SALARY_VAULT_KEY 覆盖。
+# 警告：本模板中的密钥占位符必须替换为强随机值，切勿直接上线！
+# ============================================================
+server:
+  # 生产环境只监听本机，由 OpenResty 反向代理对外提供服务
+  address: 127.0.0.1
+  port: 8080
+
+spring:
+  datasource:
+    # 重要：若数据库域名会解析出 IPv6 地址，而容器/服务器无 IPv6 路由，
+    # 会报 "Network is unreachable" 导致启动失败，生产环境建议直接用内网 IPv4。
+    url: ${SPRING_DATASOURCE_URL:jdbc:oracle:thin:@172.19.0.6:1521/TRMUSR}
+    username: ${SPRING_DATASOURCE_USERNAME:CHANGE_ME}
+    password: ${SPRING_DATASOURCE_PASSWORD:CHANGE_ME}
+    driver-class-name: oracle.jdbc.OracleDriver
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+
+salary:
+  jwt:
+    # 生产必须更换：openssl rand -base64 48
+    secret: ${SALARY_JWT_SECRET:CHANGE_ME}
+    expire-hours: 24
+  cors:
+    # 前端与后端同域名反向代理时 CORS 无感；保留域名防止跨域场景
+    allowed-origins: ${SALARY_CORS_ORIGINS:https://your-domain.example:8445}
+
+toolkit:
+  # 附件存储目录。
+  # - 进程守护/直接跑 jar：填宿主机路径 /vol1/1000/dev/uploads
+  # - Docker / 1Panel「Java 运行环境」容器：容器里不存在宿主机路径，
+  #   请用环境变量 TOOLKIT_UPLOAD_DIR=/app/uploads 覆盖，并把
+  #   /vol1/1000/dev/uploads 挂载到容器的 /app/uploads（否则容器一重建附件全丢）
+  upload-dir: ${TOOLKIT_UPLOAD_DIR:/vol1/1000/dev/uploads}
+  # 凭证加密主密钥：生产务必注入强随机串，设置后不可再改，否则旧密码无法解密
+  vault-key: ${SALARY_VAULT_KEY:CHANGE_ME}
+  max-file-mb: 100
+
+logging:
+  level:
+    com.salary: info

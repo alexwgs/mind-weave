@@ -1,0 +1,89 @@
+.salary-machine {
+  --machine-ink: #f7f5ff;
+  --machine-muted: #b8b3d0;
+  --machine-purple: #8f7af0;
+  position: relative;
+  overflow: hidden;
+  margin: 24px 0;
+  padding: 28px;
+  color: var(--machine-ink);
+  border-radius: 24px;
+  background: #25243b;
+  box-shadow: 0 18px 46px rgba(32, 31, 55, .16);
+}
+.salary-machine::before { content: ''; position: absolute; width: 420px; height: 420px; right: -220px; top: -280px; border: 1px solid rgba(174, 161, 255, .18); border-radius: 50%; box-shadow: 0 0 0 55px rgba(174, 161, 255, .04), 0 0 0 110px rgba(174, 161, 255, .025); pointer-events: none; }
+.machine-head, .machine-actions, .machine-years, .film-focus, .film-caption { display: flex; align-items: center; }
+.machine-head { position: relative; justify-content: space-between; gap: 20px; }
+.machine-kicker { display: block; color: #a89aef; font: 600 10px/1.3 ui-monospace, SFMono-Regular, Consolas, monospace; letter-spacing: 1.4px; }
+.machine-head h2 { margin: 10px 0 0; color: #fff; font: 700 22px/1.35 var(--app-display); letter-spacing: -.5px; }
+.machine-actions { gap: 8px; }
+.machine-actions .semi-button { color: #d4cee9; }
+.machine-actions .semi-button:hover { color: #fff; background: rgba(255,255,255,.08); }
+.machine-segment { display: flex; padding: 3px; border: 1px solid rgba(255,255,255,.1); border-radius: 10px; background: rgba(255,255,255,.04); }
+.machine-segment button, .machine-years button { border: 0; color: var(--machine-muted); background: transparent; }
+.machine-segment button { padding: 7px 11px; border-radius: 7px; font-size: 11px; }
+.machine-segment button.is-active { color: #2d2945; background: #d9d1ff; }
+.machine-years { position: relative; gap: 6px; margin-top: 23px; padding-bottom: 18px; border-bottom: 1px solid rgba(255,255,255,.08); overflow-x: auto; scrollbar-width: none; }
+.machine-years::-webkit-scrollbar { display: none; }
+.machine-years button { flex: 0 0 auto; padding: 7px 12px; border-radius: 999px; font-size: 11px; }
+.machine-years button:hover { color: #fff; }
+.machine-years button.is-active { color: #fff; background: rgba(143,122,240,.22); box-shadow: inset 0 0 0 1px rgba(172,157,255,.3); }
+.machine-stage { display: grid; grid-template-columns: minmax(250px, .72fr) minmax(430px, 1.55fr); gap: 36px; padding: 28px 0 26px; }
+.machine-story { min-width: 0; padding: 5px 0 4px 4px; }
+.story-period { color: #aaa4c2; font: 10px ui-monospace, SFMono-Regular, Consolas, monospace; letter-spacing: 1px; }
+.machine-story p { margin: 15px 0 5px; color: #c7c2d9; font-size: 12px; }
+.machine-story > strong { display: block; color: #fff; font: 700 clamp(32px, 3.5vw, 48px)/1.15 var(--app-display); letter-spacing: -2px; white-space: nowrap; }
+.machine-story > strong small { margin-right: 8px; color: #9b8bea; font-size: .42em; letter-spacing: 0; }
+.story-footnote { display: flex; align-items: center; gap: 9px; margin-top: 22px; color: #908aa6; font-size: 10px; }
+.story-footnote i { width: 3px; height: 3px; flex: 0 0 auto; border-radius: 50%; background: #766b9f; }
+.salary-film { min-width: 0; padding: 19px 20px 12px; border: 1px solid rgba(255,255,255,.09); border-radius: 17px; background: rgba(255,255,255,.035); }
+.film-focus { justify-content: space-between; min-height: 41px; }
+.film-focus > div { display: flex; align-items: baseline; gap: 12px; }
+.film-focus span { color: #b5afc9; font: 10px ui-monospace, SFMono-Regular, Consolas, monospace; }
+.film-focus strong { color: #fff; font: 700 21px var(--app-display); }
+.film-focus small { color: #e29b87; font-size: 10px; }
+.film-track { height: 150px; display: flex; align-items: stretch; gap: clamp(3px, .7vw, 10px); padding: 15px 0 4px; overflow-x: auto; scrollbar-width: thin; scrollbar-color: #554d73 transparent; }
+.film-frame { min-width: 28px; flex: 1 0 28px; display: flex; flex-direction: column; gap: 7px; align-items: center; padding: 0; border: 0; color: #8f89a5; background: transparent; font-size: 9px; }
+.film-bar { position: relative; width: 100%; flex: 1; display: flex; align-items: flex-end; overflow: hidden; border-radius: 5px 5px 2px 2px; background: rgba(255,255,255,.045); }
+.film-bar i { display: block; width: 100%; min-height: 4px; border-radius: inherit; background: #6f649d; transform-origin: bottom; animation: salary-rise .55s cubic-bezier(.22,.8,.32,1) both; transition: background .16s, filter .16s; }
+.film-frame:hover .film-bar i, .film-frame.is-active .film-bar i { background: var(--machine-purple); filter: brightness(1.14); }
+.film-frame.is-best .film-bar::after { content: '✦'; position: absolute; top: 4px; left: 0; right: 0; color: #ffd0bf; font-size: 9px; text-align: center; }
+.film-frame.is-active { color: #fff; }
+.film-caption { justify-content: space-between; gap: 15px; padding-top: 10px; margin-top: 4px; border-top: 1px dashed rgba(255,255,255,.08); color: #777189; font-size: 9px; }
+.machine-insights { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: 1px solid rgba(255,255,255,.08); }
+.machine-insights > div { min-width: 0; display: grid; grid-template-columns: 25px minmax(0, 1fr); column-gap: 10px; padding: 22px 16px 4px; border-right: 1px solid rgba(255,255,255,.07); }
+.machine-insights > div:first-child { padding-left: 4px; }
+.machine-insights > div:last-child { border-right: 0; }
+.machine-insights .semi-icon, .insight-glyph { grid-row: 1 / span 2; color: #9d8deb; font-size: 17px; }
+.machine-insights span { color: #d4d0df; font-size: 11px; }
+.machine-insights small { display: block; overflow: hidden; margin-top: 5px; color: #7f798f; font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
+.machine-insights strong { grid-column: 2; margin-top: 12px; color: #fff; font: 700 17px var(--app-display); white-space: nowrap; }
+.machine-insights .is-down strong { color: #ef9b89; }
+@keyframes salary-rise { from { transform: scaleY(.08); opacity: .3; } to { transform: scaleY(1); opacity: 1; } }
+@media (max-width: 1000px) {
+  .machine-stage { grid-template-columns: 1fr; gap: 24px; }
+  .machine-story { display: grid; grid-template-columns: auto 1fr; column-gap: 12px; align-items: baseline; }
+  .machine-story .story-period, .machine-story .story-footnote { grid-column: 1 / -1; }
+  .machine-story p { margin-top: 12px; }
+  .machine-story > strong { font-size: 38px; }
+  .machine-insights { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .machine-insights > div:nth-child(2) { border-right: 0; }
+  .machine-insights > div:nth-child(n+3) { border-top: 1px solid rgba(255,255,255,.07); }
+}
+@media (max-width: 700px) {
+  .salary-machine { margin: 18px 0; padding: 21px 17px; border-radius: 19px; }
+  .machine-head { align-items: flex-start; flex-direction: column; }
+  .machine-actions { width: 100%; justify-content: space-between; }
+  .machine-head h2 { font-size: 19px; }
+  .machine-years { margin-top: 18px; }
+  .machine-stage { padding-top: 22px; }
+  .machine-story { display: block; }
+  .machine-story > strong { font-size: clamp(31px, 10vw, 42px); white-space: normal; }
+  .salary-film { padding: 16px 13px 10px; }
+  .film-focus small { display: none; }
+  .film-track { height: 135px; }
+  .machine-insights > div { padding: 18px 9px 5px; grid-template-columns: 21px minmax(0, 1fr); column-gap: 7px; }
+  .machine-insights > div:first-child { padding-left: 0; }
+  .machine-insights strong { font-size: 14px; }
+}
+@media (prefers-reduced-motion: reduce) { .film-bar i { animation: none; } }

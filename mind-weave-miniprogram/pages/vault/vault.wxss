@@ -1,0 +1,191 @@
+.group-bar {
+  white-space: nowrap;
+  margin-bottom: 16rpx;
+}
+
+.chip {
+  display: inline-block;
+  padding: 10rpx 28rpx;
+  background: #fff;
+  border-radius: 999rpx;
+  margin-right: 14rpx;
+  font-size: 26rpx;
+  color: #6e6977;
+}
+
+.chip.active {
+  background: #efedff;
+  color: #6658cc;
+  font-weight: 600;
+}
+
+.search-row {
+  display: flex;
+  margin-bottom: 20rpx;
+}
+
+.search-input {
+  flex: 1;
+  background: #fff;
+  border-radius: 12rpx;
+  height: 72rpx;
+  padding: 0 22rpx;
+  font-size: 26rpx;
+}
+
+.btn-add {
+  margin-left: 14rpx;
+  background: #6658cc;
+  color: #fff;
+  border-radius: 12rpx;
+  padding: 0 30rpx;
+  line-height: 72rpx;
+  font-size: 26rpx;
+}
+
+.item-card {
+  padding: 24rpx;
+}
+
+.item-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.item-name {
+  font-size: 30rpx;
+  font-weight: 600;
+}
+
+.item-group {
+  background: #f2f3f5;
+  color: #6e6977;
+  font-size: 22rpx;
+  padding: 4rpx 16rpx;
+  border-radius: 8rpx;
+}
+
+.item-line {
+  margin-top: 12rpx;
+  font-size: 26rpx;
+  color: #8f8a98;
+}
+
+.mask {
+  color: #242437;
+  font-family: monospace;
+}
+
+.item-note {
+  margin-top: 10rpx;
+  font-size: 24rpx;
+  color: #6e6977;
+}
+
+.sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #fff;
+  border-radius: 24rpx 24rpx 0 0;
+  padding: 30rpx;
+  z-index: 20;
+  max-height: 82vh;
+  overflow-y: auto;
+}
+
+.sheet-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  margin-bottom: 20rpx;
+  text-align: center;
+}
+
+.ipt {
+  background: #f4f3f0;
+  border-radius: 10rpx;
+  height: 76rpx;
+  padding: 0 22rpx;
+  font-size: 26rpx;
+  margin-bottom: 16rpx;
+  box-sizing: border-box;
+}
+
+.picker {
+  line-height: 76rpx;
+}
+
+.pwd-row {
+  display: flex;
+}
+
+.flex1 {
+  flex: 1;
+}
+
+.btn-gen {
+  margin-left: 14rpx;
+  background: #8175c7;
+  color: #fff;
+  border-radius: 10rpx;
+  line-height: 76rpx;
+  padding: 0 26rpx;
+  font-size: 26rpx;
+}
+
+.field-title {
+  font-size: 26rpx;
+  font-weight: 600;
+  margin: 8rpx 0 12rpx;
+}
+
+.field-add {
+  color: #6658cc;
+  font-weight: 400;
+  margin-left: 16rpx;
+}
+
+.field-row {
+  display: flex;
+  gap: 12rpx;
+  align-items: center;
+}
+
+.field-del {
+  color: #f53f3f;
+  font-size: 28rpx;
+  padding: 0 6rpx;
+}
+
+.sheet-btns {
+  display: flex;
+  gap: 16rpx;
+  margin-top: 20rpx;
+}
+
+.btn {
+  flex: 1;
+  text-align: center;
+  border-radius: 12rpx;
+  line-height: 84rpx;
+  font-size: 28rpx;
+}
+
+.btn.ghost {
+  background: #f2f3f5;
+  color: #6e6977;
+}
+
+.btn.primary {
+  background: #6658cc;
+  color: #fff;
+}
+
+.load-tip {
+  text-align: center;
+  color: #aaa6b2;
+  font-size: 24rpx;
+  padding: 20rpx 0 40rpx;
+}

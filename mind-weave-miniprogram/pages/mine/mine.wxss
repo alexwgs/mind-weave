@@ -1,0 +1,87 @@
+.user-card {
+  display: flex;
+  align-items: center;
+  background: linear-gradient(135deg, #6658cc 0%, #8579d6 100%);
+  color: #ffffff;
+}
+
+.avatar {
+  width: 108rpx;
+  height: 108rpx;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.22);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 44rpx;
+  font-weight: 700;
+}
+
+.user-info {
+  margin-left: 24rpx;
+}
+
+.user-name {
+  font-size: 34rpx;
+  font-weight: 700;
+}
+
+.user-sub {
+  margin-top: 8rpx;
+  font-size: 24rpx;
+  opacity: 0.85;
+}
+
+.menu-card {
+  padding: 0 24rpx;
+}
+
+.menu-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30rpx 0;
+  font-size: 28rpx;
+  border-bottom: 1rpx solid #f0f1f4;
+}
+
+.menu-item:last-child {
+  border-bottom: none;
+}
+
+.menu-arrow {
+  color: #aaa6b2;
+  font-size: 34rpx;
+}
+
+.danger {
+  color: #f53f3f;
+}
+
+.pwd-form {
+  padding: 8rpx 0 24rpx;
+}
+
+.pwd-input {
+  background: #f4f3f0;
+  border-radius: 10rpx;
+  height: 76rpx;
+  padding: 0 22rpx;
+  font-size: 26rpx;
+  margin-bottom: 16rpx;
+}
+
+.ph {
+  color: #aaa6b2;
+}
+
+.pwd-btn {
+  margin-top: 8rpx;
+}
+
+.version-tip {
+  text-align: center;
+  color: #aaa6b2;
+  font-size: 22rpx;
+  margin-top: 24rpx;
+}

@@ -1,0 +1,45 @@
+<view class="page" wx:if="{{item}}">
+  <view class="card head-card">
+    <view class="head-name">{{item.name}}</view>
+    <view class="head-sub">上次查看：{{item.lastViewText || '从未'}}</view>
+  </view>
+
+  <view class="card">
+    <view class="row">
+      <view class="r-label">账号</view>
+      <view class="r-value">{{accountText || '—'}}</view>
+      <view class="r-copy" data-v="{{accountText}}" bindtap="onCopy">复制</view>
+    </view>
+    <view class="row">
+      <view class="r-label">密码</view>
+      <view class="r-value">{{passwordText || '—'}}</view>
+      <view class="r-copy" data-v="{{passwordText}}" bindtap="onCopy">复制</view>
+    </view>
+    <view class="row" wx:for="{{fieldsText}}" wx:for-item="f" wx:for-index="idx" wx:key="idx">
+      <view class="r-label">{{f.key}}</view>
+      <view class="r-value">{{f.value}}</view>
+      <view class="r-copy" data-v="{{f.value}}" bindtap="onCopy">复制</view>
+    </view>
+    <view class="row" wx:if="{{item.note}}">
+      <view class="r-label">备注</view>
+      <view class="r-value">{{item.note}}</view>
+    </view>
+    <view class="unlock-btn" bindtap="openPin">{{revealed ? '明文已显示，5 秒后隐藏' : '🔓 验证 PIN 查看明文'}}</view>
+  </view>
+
+  <view class="card">
+    <view class="section-title">附件（{{attachments.length}}）</view>
+    <view class="att" wx:for="{{attachments}}" wx:key="id" data-id="{{item.id}}" bindtap="previewImage">
+      <text class="att-name">{{item.originalName}}</text>
+      <text class="att-size">{{item.sizeText}}KB</text>
+    </view>
+    <view wx:if="{{!attachments.length}}" class="empty">暂无附件</view>
+  </view>
+
+  <view class="mask" wx:if="{{showPin}}" bindtap="hidePin"></view>
+  <view class="pin-sheet" wx:if="{{showPin}}">
+    <view class="pin-title">请输入 PIN 码</view>
+    <input class="pin-input" password type="number" placeholder="PIN 码" value="{{pin}}" bindinput="onPin" />
+    <view class="pin-btn" loading="{{verifyLoading}}" bindtap="verifyAndReveal">验证并查看</view>
+  </view>
+</view>

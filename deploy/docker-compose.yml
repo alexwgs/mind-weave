@@ -1,0 +1,41 @@
+# ============================================================
+# MindWeave · 织脑 - Docker 部署模板（OnePanel 容器/Java 项目适用）
+# 用法：把内容填入 OnePanel 的"编排/Compose"（或容器创建页面），
+#       替换占位符后部署。
+# ============================================================
+services:
+  mind-weave:
+    # 替换为你构建好的镜像名（或面板从 Dockerfile 构建后的镜像）
+    image: mind-weave:latest
+    container_name: mind-weave
+    restart: always
+    # 只在本机监听，由 OpenResty 反代对外（8445）
+    ports:
+      - "127.0.0.1:8080:8080"
+    # 加入 1panel-network，才能访问同一网络里的 Oracle 容器（172.19.0.6）
+    networks:
+      - 1panel-network
+    environment:
+      TZ: Asia/Shanghai
+      # Oracle 与本后端在同一服务器，容器 IP 172.19.0.6（1panel-network）
+      # 凭据请填写真实值，或用同目录 .env 文件注入（.env 已被 .gitignore 忽略）
+      SPRING_DATASOURCE_URL: "jdbc:oracle:thin:@172.19.0.6:1521/TRMUSR"
+      SPRING_DATASOURCE_USERNAME: "${DB_USERNAME:-CHANGE_ME}"
+      SPRING_DATASOURCE_PASSWORD: "${DB_PASSWORD:-CHANGE_ME}"
+      # JWT 签名密钥：openssl rand -base64 48
+      SALARY_JWT_SECRET: "${JWT_SECRET:-CHANGE_ME}"
+      # 工具库凭证加密主密钥（保险箱密码 AES 加密用，务必替换为强随机串，且设置后不可再改）
+      SALARY_VAULT_KEY: "${VAULT_KEY:-CHANGE_ME}"
+      # 附件存储目录（保险箱图片/文章图片、视频、PDF/Word 等文件）
+      # 必须与下面 volumes 里挂载的容器路径一致，否则容器一重启附件就全丢
+      TOOLKIT_UPLOAD_DIR: "/app/uploads"
+      # 强制 IPv4 优先（关键修复项）
+      JAVA_OPTS: "-Djava.net.preferIPv4Stack=true -Xms256m -Xmx768m"
+    volumes:
+      - /vol1/1000/dev/logs:/app/logs
+      # 附件目录挂到宿主机，容器重建/升级都不会丢文件（关键）
+      - /vol1/1000/dev/uploads:/app/uploads
+
+networks:
+  1panel-network:
+    external: true

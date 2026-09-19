@@ -1,0 +1,81 @@
+# ============================================================
+# MindWeave · 织脑  仓库忽略规则
+# ============================================================
+
+# ---------- 凭据 / 环境配置（绝不入库） ----------
+# 本地与生产真实配置（含数据库口令、JWT 密钥、保险箱主密钥）
+mind-weave-backend/src/main/resources/application-local.yml
+deploy/application-prod.yml
+deploy/*.local.yml
+*.pem
+*.key
+*.p12
+*.jks
+.env
+.env.*
+!.env.example
+
+# ---------- 构建产物 ----------
+target/
+build/
+dist/
+out/
+*.class
+*.jar
+*.war
+!.mvn/wrapper/maven-wrapper.jar
+
+# ---------- 依赖 ----------
+node_modules/
+.pnpm-store/
+.yarn/
+bower_components/
+
+# ---------- 运行期数据 / 上传文件 ----------
+mind-weave-backend/uploads/
+uploads/
+logs/
+*.log
+*.log.err
+*.err.log
+
+# ---------- 临时调试文件（验证码截图、导出样本、页面截图） ----------
+captcha*.png
+captcha*.txt
+captcha_*.txt
+export_*.xlsx
+final-*.png
+panel_pubkey.b64
+*.tmp
+*.bak
+
+# ---------- 含个人隐私的数据文件 ----------
+工资明细表.xlsx
+*明细表*.xlsx
+*工资*.xlsx
+!package-lock.json
+
+# ---------- IDE / 编辑器 ----------
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+!.vscode/extensions.json
+*.swp
+*.swo
+*~
+
+# ---------- 微信开发者工具本地私有配置 ----------
+mind-weave-miniprogram/project.private.config.json
+
+# ---------- 本地备份 / 工具缓存 ----------
+.codex/miniprogram-git-backup/
+.cache/
+
+# ---------- 操作系统 ----------
+.DS_Store
+Thumbs.db
+[Dd]esktop.ini
+$RECYCLE.BIN/
+desktop.ini

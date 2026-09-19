@@ -1,0 +1,168 @@
+.filter-card {
+  padding: 20rpx;
+}
+
+.filter-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16rpx;
+}
+
+.filter-row:last-child {
+  margin-bottom: 0;
+}
+
+.picker {
+  background: #f4f3f0;
+  border-radius: 10rpx;
+  padding: 12rpx 24rpx;
+  font-size: 26rpx;
+  margin-right: 16rpx;
+}
+
+.search-input {
+  flex: 1;
+  background: #f4f3f0;
+  border-radius: 10rpx;
+  height: 68rpx;
+  padding: 0 22rpx;
+  font-size: 26rpx;
+}
+
+.ph {
+  color: #aaa6b2;
+}
+
+.btn-search {
+  margin-left: 16rpx;
+  background: #6658cc;
+  color: #ffffff;
+  border-radius: 10rpx;
+  padding: 14rpx 32rpx;
+  font-size: 26rpx;
+}
+
+.record-card {
+  padding: 24rpx;
+}
+
+.record-head {
+  display: flex;
+  align-items: center;
+}
+
+.record-month {
+  font-size: 30rpx;
+  font-weight: 600;
+}
+
+.record-grade {
+  margin-left: 14rpx;
+  background: #efedff;
+  color: #6658cc;
+  border-radius: 8rpx;
+  padding: 4rpx 14rpx;
+  font-size: 22rpx;
+}
+
+.record-comment {
+  margin-left: auto;
+  color: #ff8800;
+  font-size: 22rpx;
+}
+
+.record-arrow {
+  margin-left: 12rpx;
+  color: #aaa6b2;
+  font-size: 34rpx;
+}
+
+.record-nums {
+  display: flex;
+  margin-top: 20rpx;
+  background: #f8f9fb;
+  border-radius: 12rpx;
+  padding: 18rpx 0;
+}
+
+.num-item {
+  flex: 1;
+  text-align: center;
+}
+
+.num-label {
+  font-size: 22rpx;
+  color: #8f8a98;
+}
+
+.num-value {
+  margin-top: 8rpx;
+  font-size: 28rpx;
+  color: #242437;
+}
+
+.num-value.strong {
+  color: #6658cc;
+  font-weight: 700;
+}
+
+.group-toggle {
+  margin-top: 18rpx;
+  text-align: center;
+  color: #6658cc;
+  font-size: 24rpx;
+  padding: 10rpx 0;
+  background: #f0f5ff;
+  border-radius: 10rpx;
+}
+
+.groups {
+  margin-top: 16rpx;
+}
+
+.group {
+  border-radius: 12rpx;
+  margin-bottom: 12rpx;
+  overflow: hidden;
+}
+
+.group-head {
+  display: flex;
+  align-items: center;
+  padding: 18rpx 20rpx;
+  font-size: 26rpx;
+  font-weight: 600;
+}
+
+.group-total {
+  margin-left: auto;
+  margin-right: 12rpx;
+  font-weight: 700;
+}
+
+.group-body {
+  padding: 0 20rpx 12rpx;
+}
+
+.field-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 10rpx 0;
+  font-size: 26rpx;
+}
+
+.field-label {
+  color: #6e6977;
+}
+
+.field-value {
+  color: #242437;
+  font-weight: 600;
+}
+
+.load-tip {
+  text-align: center;
+  color: #aaa6b2;
+  font-size: 24rpx;
+  padding: 16rpx 0 40rpx;
+}

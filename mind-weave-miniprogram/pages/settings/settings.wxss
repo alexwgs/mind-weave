@@ -1,0 +1,101 @@
+.sec-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  margin-bottom: 10rpx;
+}
+
+.sec-desc {
+  font-size: 24rpx;
+  color: #8f8a98;
+  margin-bottom: 20rpx;
+  line-height: 1.6;
+}
+
+.ipt {
+  background: #f4f3f0;
+  border-radius: 10rpx;
+  height: 76rpx;
+  padding: 0 22rpx;
+  font-size: 26rpx;
+  margin-bottom: 16rpx;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.btn-row {
+  display: flex;
+  gap: 16rpx;
+}
+
+.btn {
+  flex: 1;
+  text-align: center;
+  border-radius: 12rpx;
+  line-height: 84rpx;
+  font-size: 28rpx;
+}
+
+.btn.primary {
+  background: #6658cc;
+  color: #fff;
+}
+
+.btn.ghost {
+  background: #f2f3f5;
+  color: #6e6977;
+}
+
+.tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+  margin-bottom: 20rpx;
+}
+
+.tag-chip {
+  padding: 10rpx 26rpx;
+  background: #f2f3f5;
+  border-radius: 999rpx;
+  font-size: 24rpx;
+  color: #6e6977;
+}
+
+.tag-chip.active {
+  background: #efedff;
+  color: #6658cc;
+  font-weight: 600;
+}
+
+.gesture-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 110rpx);
+  gap: 30rpx;
+  justify-content: center;
+  margin: 16rpx 0 24rpx;
+}
+
+.gesture-cell {
+  width: 110rpx;
+  height: 110rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gesture-dot {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 50%;
+  border: 4rpx solid #c8cdd6;
+}
+
+.gesture-dot.active {
+  background: #6658cc;
+  border-color: #6658cc;
+}
+
+.btn-row {
+  display: flex;
+  gap: 16rpx;
+  margin-bottom: 20rpx;
+}

@@ -1,0 +1,47 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: mind-weave
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+  datasource:
+    # 本地/生产凭据一律通过环境变量注入：
+    #   SPRING_DATASOURCE_URL / SPRING_DATASOURCE_USERNAME / SPRING_DATASOURCE_PASSWORD
+    url: ${SPRING_DATASOURCE_URL:jdbc:oracle:thin:@localhost:1521/TRMUSR}
+    username: ${SPRING_DATASOURCE_USERNAME:trmusr}
+    password: ${SPRING_DATASOURCE_PASSWORD:}
+    driver-class-name: oracle.jdbc.OracleDriver
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+  jackson:
+    time-zone: Asia/Shanghai
+    date-format: yyyy-MM-dd HH:mm:ss
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+  global-config:
+    banner: false
+
+salary:
+  jwt:
+    # 生产必须通过 SALARY_JWT_SECRET 注入强随机密钥：openssl rand -base64 48
+    secret: ${SALARY_JWT_SECRET:mind-weave-dev-only-jwt-secret-please-override}
+    expire-hours: 24
+  cors:
+    allowed-origins: ${SALARY_CORS_ORIGINS:http://localhost:5173,http://127.0.0.1:5173}
+
+toolkit:
+  upload-dir: ${TOOLKIT_UPLOAD_DIR:./uploads}
+  # 保险箱凭证加密主密钥：生产必须通过 SALARY_VAULT_KEY 注入，且设置后不可再改
+  vault-key: ${SALARY_VAULT_KEY:dev-only-vault-key-please-override}
+  max-file-mb: 100
+
+logging:
+  level:
+    com.salary: info

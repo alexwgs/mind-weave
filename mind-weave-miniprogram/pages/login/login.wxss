@@ -1,0 +1,27 @@
+.login-page { box-sizing: border-box; min-height: 100vh; overflow: hidden; padding: 0 30rpx calc(44rpx + env(safe-area-inset-bottom)); background: #242437; }
+.login-hero { position: relative; padding: 98rpx 10rpx 86rpx; color: #fff; }
+.login-hero::after { content: ''; position: absolute; right: -180rpx; top: -120rpx; width: 430rpx; height: 430rpx; border: 1rpx solid rgba(185,174,255,.15); border-radius: 50%; box-shadow: 0 0 0 60rpx rgba(185,174,255,.025), 0 0 0 120rpx rgba(185,174,255,.015); }
+.brand-row { position: relative; z-index: 1; display: flex; align-items: center; gap: 16rpx; color: #a9a3b8; font-family: "DIN Alternate", monospace; font-size: 18rpx; letter-spacing: 3rpx; }
+.logo-badge { width: 54rpx; height: 54rpx; display: flex; align-items: center; justify-content: center; border: 1rpx solid rgba(255,255,255,.18); border-radius: 15rpx; color: #d9d3ff; background: rgba(255,255,255,.05); font-family: serif; font-size: 27rpx; }
+.app-name { position: relative; z-index: 1; display: flex; flex-direction: column; margin-top: 42rpx; font-size: 43rpx; font-weight: 740; line-height: 1.42; letter-spacing: -1rpx; }
+.app-slogan { position: relative; z-index: 1; margin-top: 18rpx; color: #aaa6b9; font-size: 22rpx; line-height: 1.65; }
+.hero-thread { position: relative; z-index: 1; display: flex; align-items: center; width: 270rpx; margin-top: 38rpx; }
+.hero-thread text { width: 11rpx; height: 11rpx; border: 2rpx solid #aaa0e8; border-radius: 50%; }
+.hero-thread text:first-child { background: #aaa0e8; box-shadow: 0 0 0 6rpx rgba(170,160,232,.1); }
+.hero-thread view { height: 1rpx; flex: 1; background: #4d4960; }
+
+.login-card, .bind-card { position: relative; z-index: 2; margin-top: -26rpx; padding: 36rpx 32rpx 30rpx; border: 1rpx solid rgba(255,255,255,.08); border-radius: 28rpx; background: #fff; box-shadow: 0 24rpx 70rpx rgba(13,13,22,.28); }
+.bind-card { margin-top: 22rpx; }
+.card-kicker { color: #7d71c5; font-family: "DIN Alternate", monospace; font-size: 15rpx; letter-spacing: 2rpx; }
+.card-title, .bind-title { margin-top: 6rpx; color: #29283a; font-size: 32rpx; font-weight: 720; }
+.btn-wx { height: 84rpx; margin: 30rpx 0 0; border-radius: 16rpx; color: #fff; background: #242437; font-size: 27rpx; font-weight: 600; line-height: 84rpx; }
+.divider { display: flex; align-items: center; margin: 27rpx 0; color: #aaa6b2; font-size: 19rpx; }
+.divider::before, .divider::after { content: ''; height: 1rpx; flex: 1; background: #ece9ef; }
+.divider text { padding: 0 18rpx; }
+.field { margin-bottom: 22rpx; }
+.field-label { margin-bottom: 10rpx; color: #6e6977; font-size: 21rpx; font-weight: 600; }
+.field-input { box-sizing: border-box; height: 82rpx; padding: 0 22rpx; border: 1rpx solid #e5e2e9; border-radius: 15rpx; color: #29283a; background: #f7f6f8; font-size: 26rpx; }
+.ph { color: #aaa6b2; }
+.login-btn { height: 84rpx; margin-top: 27rpx; border-radius: 16rpx; background: #6658cc; font-size: 27rpx; letter-spacing: 0; line-height: 84rpx; }
+.login-tip { margin-top: 22rpx; color: #aaa6b2; text-align: center; font-size: 19rpx; }
+.bind-desc { margin: 12rpx 0 26rpx; color: #8f8a98; font-size: 22rpx; line-height: 1.6; }

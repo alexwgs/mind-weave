@@ -1,0 +1,30 @@
+<view class="unlock-page">
+  <view class="unlock-title">
+    {{type === 'pin' ? '请输入 6 位 PIN 码' : (type === 'gesture' ? '绘制解锁手势' : '身份验证')}}
+  </view>
+  <view class="unlock-sub">用于查看收支数据</view>
+
+  <view wx:if="{{type === 'pin'}}" class="pin-area">
+    <view class="pin-dots">
+      <view class="pin-dot {{pin.length > i ? 'filled' : ''}}" wx:for="{{[0,1,2,3,4,5]}}" wx:for-item="i" wx:key="*this"></view>
+    </view>
+    <input class="pin-input" type="number" maxlength="6" password focus value="{{pin}}" bindinput="onPinInput" />
+  </view>
+
+  <view wx:if="{{type === 'gesture'}}" class="gesture-area">
+    <view class="gesture-grid">
+      <view class="gesture-cell" wx:for="{{[0,1,2,3,4,5,6,7,8]}}" wx:for-item="i" wx:key="*this" data-i="{{i}}" bindtap="onDotTap">
+        <view class="gesture-dot {{gestureSet[i] ? 'active' : ''}}"></view>
+      </view>
+    </view>
+    <view class="gesture-btns">
+      <view class="gbtn ghost" bindtap="clearGesture">重画</view>
+      <view class="gbtn primary" bindtap="confirmGesture">完成</view>
+    </view>
+  </view>
+
+  <view wx:if="{{type === 'face'}}" class="face-area">
+    <view class="face-btn" bindtap="startFace">人脸 / 指纹解锁</view>
+    <view wx:if="{{hasPin}}" class="face-fallback" bindtap="usePin">改用 PIN 码解锁</view>
+  </view>
+</view>

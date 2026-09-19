@@ -1,0 +1,133 @@
+.unlock-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 140rpx;
+  background: linear-gradient(160deg, #242437 0%, #37344f 60%, #615c7d 100%);
+  box-sizing: border-box;
+}
+
+.unlock-title {
+  color: #fff;
+  font-size: 38rpx;
+  font-weight: 700;
+  letter-spacing: 2rpx;
+}
+
+.unlock-sub {
+  margin-top: 12rpx;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 24rpx;
+}
+
+.pin-area {
+  margin-top: 80rpx;
+}
+
+.pin-dots {
+  display: flex;
+  gap: 36rpx;
+}
+
+.pin-dot {
+  width: 26rpx;
+  height: 26rpx;
+  border-radius: 50%;
+  border: 3rpx solid rgba(255, 255, 255, 0.55);
+}
+
+.pin-dot.filled {
+  background: #fff;
+  border-color: #fff;
+}
+
+.pin-input {
+  margin-top: 60rpx;
+  width: 480rpx;
+  height: 92rpx;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 16rpx;
+  color: #fff;
+  font-size: 40rpx;
+  text-align: center;
+  letter-spacing: 20rpx;
+}
+
+.gesture-area {
+  margin-top: 70rpx;
+}
+
+.gesture-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 130rpx);
+  gap: 36rpx;
+}
+
+.gesture-cell {
+  width: 130rpx;
+  height: 130rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gesture-dot {
+  width: 60rpx;
+  height: 60rpx;
+  border-radius: 50%;
+  border: 4rpx solid rgba(255, 255, 255, 0.6);
+}
+
+.gesture-dot.active {
+  background: #fff;
+  border-color: #fff;
+  box-shadow: 0 0 24rpx rgba(255, 255, 255, 0.6);
+}
+
+.gesture-btns {
+  margin-top: 60rpx;
+  display: flex;
+  gap: 24rpx;
+}
+
+.gbtn {
+  padding: 16rpx 56rpx;
+  border-radius: 999rpx;
+  font-size: 28rpx;
+}
+
+.gbtn.ghost {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
+
+.gbtn.primary {
+  background: #fff;
+  color: #242437;
+  font-weight: 700;
+}
+
+.face-area {
+  margin-top: 90rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.face-btn {
+  width: 400rpx;
+  text-align: center;
+  background: #fff;
+  color: #242437;
+  font-size: 32rpx;
+  font-weight: 700;
+  padding: 26rpx 0;
+  border-radius: 999rpx;
+}
+
+.face-fallback {
+  margin-top: 30rpx;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 26rpx;
+}

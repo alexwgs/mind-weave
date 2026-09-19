@@ -1,0 +1,147 @@
+/* 日程待办：沿用工作台的薄荷/淡紫语汇，只补这一页需要的列表与表单样式 */
+
+.todos-page { padding-bottom: 20px; }
+
+.todos-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.todos-stat {
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius);
+  box-shadow: var(--app-shadow);
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.todos-stat > span:last-child { font-size: 11px; color: var(--app-muted); letter-spacing: .5px; }
+.todos-stat.is-alert .stat-value { color: #bf6553; }
+
+.todos-push-status {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 14px;
+  padding: 14px 17px;
+  border: 1px solid var(--app-border);
+  border-radius: 14px;
+  background: var(--app-surface);
+}
+.todos-push-status.is-ready { border-color: #c8e3d6; background: #f1faf6; }
+.todos-push-status.is-warning { border-color: #ead9b7; background: #fffaf0; }
+.todos-push-icon { width: 36px; height: 36px; display: grid; place-items: center; border-radius: 11px; color: #6554a9; background: var(--app-lilac); }
+.todos-push-status strong { display: block; font-size: 12px; }
+.todos-push-status p { margin: 4px 0 0; color: var(--app-muted); font-size: 10px; line-height: 1.55; }
+.todos-push-result { color: var(--app-muted); font-size: 10px; white-space: nowrap; }
+
+.todos-quick-add { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; padding: 12px 14px; border: 1px solid var(--app-border); border-radius: 14px; background: var(--app-surface); box-shadow: var(--app-shadow); }
+.todos-quick-add .semi-input-wrapper { flex: 1; border-color: transparent; background: var(--app-bg); }
+.quick-bolt { width: 31px; height: 31px; display: grid; place-items: center; flex: 0 0 auto; border-radius: 10px; color: #9b6941; background: #fff1d9; }
+
+.todos-filter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.todos-list-card { padding: 8px 22px 18px; }
+.todos-loading { height: 240px; display: grid; place-items: center; }
+
+.todos-list { list-style: none; margin: 0; padding: 0; }
+.todos-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 13px;
+  padding: 18px 0;
+  border-bottom: 1px dashed var(--app-border);
+}
+.todos-row:last-child { border-bottom: 0; }
+.todos-row.is-done .todos-row-main strong { color: var(--app-muted); text-decoration: line-through; }
+.todos-row.is-done { opacity: .72; }
+.todos-row .semi-checkbox { margin-top: 1px; }
+
+.todos-row-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 9px; }
+.todos-row-title { display: flex; align-items: center; flex-wrap: wrap; gap: 9px; }
+.todos-row-title strong { font-size: 13px; font-weight: 500; line-height: 1.6; }
+
+.priority-flag { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; background: #9aacb0; }
+.priority-flag.priority-HIGH { background: #e18c7e; }
+.priority-flag.priority-MEDIUM { background: #e1b16d; }
+
+.todos-project {
+  font-size: 10px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--app-lilac);
+  color: #6554a9;
+}
+
+.todos-row-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  font-size: 11px;
+  color: var(--app-muted);
+}
+.todos-row-meta .is-overdue { color: #bf6553; }
+.todos-row-meta .is-quiet { opacity: .8; }
+
+.remind-chip { padding: 2px 9px; border-radius: 999px; font-size: 10px; }
+.remind-chip.tone-green { background: var(--app-mint); color: #477a65; }
+.remind-chip.tone-purple { background: var(--app-lilac); color: #6554a9; }
+.remind-chip.tone-orange { background: var(--app-peach); color: #b46b4e; }
+.remind-chip.tone-blue { background: #e8f0ff; color: #3d6fbf; }
+.remind-chip.tone-muted { background: var(--app-bg); color: var(--app-muted); }
+
+.todos-subs { display: flex; flex-direction: column; gap: 7px; padding-left: 2px; }
+.todos-sub { display: flex; align-items: center; gap: 9px; font-size: 12px; color: var(--semi-color-text-1); }
+.todos-sub.is-done span { text-decoration: line-through; color: var(--app-muted); }
+
+.todos-row-actions { flex-shrink: 0; }
+
+.todos-pager { display: flex; justify-content: flex-end; padding-top: 18px; }
+
+.todos-form { display: flex; flex-direction: column; gap: 17px; padding: 4px 0 2px; }
+.todos-field { display: flex; flex-direction: column; gap: 7px; font-size: 12px; }
+.todos-field > span { color: var(--app-muted); }
+.todos-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.todos-inline { display: flex; align-items: center; gap: 9px; }
+.todos-inline > .semi-datePicker { flex: 1; }
+.todos-hint { margin: 0; font-size: 11px; color: var(--app-muted); background: var(--app-bg); border-radius: 9px; padding: 10px 13px; }
+.todos-preset-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 1px; }
+.todos-preset-row button { padding: 4px 8px; border: 0; border-radius: 7px; color: #6554a9; background: var(--app-lilac); font-size: 9px; }
+
+.todos-days { display: flex; flex-wrap: wrap; gap: 8px; }
+.todos-day {
+  padding: 7px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--app-border);
+  background: var(--app-surface);
+  color: var(--semi-color-text-1);
+  font-size: 12px;
+  transition: background .18s, border-color .18s, color .18s;
+}
+.todos-day.is-on { background: var(--app-lilac); border-color: #b6a7e9; color: #5543c5; }
+
+.todos-sub-editor { display: flex; flex-direction: column; gap: 8px; }
+.todos-sub-edit { display: flex; align-items: center; gap: 9px; }
+.todos-sub-edit > .semi-input-wrapper { flex: 1; }
+
+@media (max-width: 700px) {
+  .todos-field-row { grid-template-columns: 1fr; }
+  .todos-list-card { padding: 6px 16px 14px; }
+  .todos-row-actions { flex-direction: column; }
+  .todos-row-meta { gap: 9px; }
+  .todos-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .todos-push-status { grid-template-columns: 38px minmax(0, 1fr); }
+  .todos-push-result { grid-column: 2; }
+  .todos-quick-add { align-items: stretch; }
+  .todos-quick-add .quick-bolt { display: none; }
+}

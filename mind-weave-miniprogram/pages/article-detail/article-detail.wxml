@@ -1,0 +1,18 @@
+<view class="page" wx:if="{{article}}">
+  <view class="card">
+    <view class="title">{{article.title}}</view>
+    <view class="meta">
+      <text wx:if="{{article.categoryPath}}">{{article.categoryPath}}</text>
+      <text>更新于 {{article.updatedText}}</text>
+    </view>
+    <view class="summary" wx:if="{{article.summary}}">{{article.summary}}</view>
+    <rich-text class="content" nodes="{{html}}"></rich-text>
+  </view>
+
+  <view class="card" wx:if="{{videos.length}}">
+    <view class="section-title">视频（{{videos.length}}）</view>
+    <view class="video-item" wx:for="{{videos}}" wx:key="id" data-id="{{item.id}}" bindtap="playVideo">
+      ▶ 视频 {{index + 1}}（点击播放）
+    </view>
+  </view>
+</view>

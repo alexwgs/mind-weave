@@ -1,0 +1,34 @@
+<view class="login-page">
+  <view class="login-hero">
+    <view class="brand-row"><view class="logo-badge">织</view><text>MINDWEAVE</text></view>
+    <view class="app-name"><text>把散落的想法，</text><text>编织成你的第二大脑。</text></view>
+    <view class="app-slogan">知识、行动与智能体，在这里互相连接。</view>
+    <view class="hero-thread"><text></text><view></view><text></text><view></view><text></text></view>
+  </view>
+
+  <view class="login-card">
+    <view class="card-kicker">WELCOME BACK</view>
+    <view class="card-title">进入你的织脑</view>
+    <button class="btn-wx" loading="{{wxLoading}}" disabled="{{wxLoading}}" bindtap="onWxLogin">微信一键登录</button>
+    <view class="divider"><text>或使用系统账号</text></view>
+    <view class="field">
+      <view class="field-label">账号</view>
+      <input class="field-input" placeholder="请输入用户名" placeholder-class="ph" value="{{username}}" bindinput="onUsername" />
+    </view>
+    <view class="field">
+      <view class="field-label">密码</view>
+      <input class="field-input" password placeholder="请输入密码" placeholder-class="ph" value="{{password}}" bindinput="onPassword" confirm-type="done" bindconfirm="onLogin" />
+    </view>
+    <button class="btn-primary login-btn" loading="{{loading}}" disabled="{{loading}}" bindtap="onLogin">进入 MindWeave</button>
+    <view class="login-tip">账号由管理员分配</view>
+  </view>
+
+  <view class="bind-card" wx:if="{{showBind}}">
+    <view class="card-kicker">FIRST CONNECTION</view>
+    <view class="bind-title">绑定系统账号</view>
+    <view class="bind-desc">首次使用微信登录，请完成一次账号绑定。</view>
+    <view class="field"><view class="field-label">账号</view><input class="field-input" placeholder="请输入用户名" placeholder-class="ph" value="{{bindUser}}" bindinput="onBindUser" /></view>
+    <view class="field"><view class="field-label">密码</view><input class="field-input" password placeholder="请输入密码" placeholder-class="ph" value="{{bindPwd}}" bindinput="onBindPwd" confirm-type="done" bindconfirm="onBind" /></view>
+    <button class="btn-primary login-btn" bindtap="onBind">绑定并进入</button>
+  </view>
+</view>

@@ -1,0 +1,87 @@
+<view class="page">
+  <view class="card filter-card">
+    <view class="filter-row">
+      <picker mode="selector" range="{{yearOptions}}" value="{{yearIndex}}" bindchange="onYear">
+        <view class="picker">{{yearLabel}} ▾</view>
+      </picker>
+      <picker mode="selector" range="{{sortOptions}}" value="{{sortIndex}}" bindchange="onSort">
+        <view class="picker">{{sortOptions[sortIndex]}} ▾</view>
+      </picker>
+    </view>
+    <view class="filter-row">
+      <input
+        class="search-input"
+        placeholder="搜索姓名/关键词"
+        placeholder-class="ph"
+        value="{{keyword}}"
+        bindinput="onKeyword"
+        confirm-type="search"
+        bindconfirm="onSearch"
+      />
+      <view class="btn-search" bindtap="onSearch">搜索</view>
+    </view>
+  </view>
+
+  <view class="list">
+    <view class="card record-card" wx:for="{{rows}}" wx:key="id">
+      <view class="record-head" bindtap="onDetail" data-id="{{item.id}}">
+        <view class="record-month">{{item.monthLabel}}</view>
+        <view class="record-grade" wx:if="{{item.grade}}">{{item.grade}}</view>
+        <view class="record-comment" wx:if="{{item.commentCount}}">{{item.commentCount}} 条批注</view>
+        <view class="record-arrow">›</view>
+      </view>
+      <view class="record-nums">
+        <view class="num-item">
+          <view class="num-label">实发金额</view>
+          <view class="num-value strong">{{item.netPayText}}</view>
+        </view>
+        <view class="num-item">
+          <view class="num-label">另发奖金</view>
+          <view class="num-value">{{item.extraText}}</view>
+        </view>
+        <view class="num-item">
+          <view class="num-label">总薪资</view>
+          <view class="num-value">{{item.totalText}}</view>
+        </view>
+      </view>
+      <view class="group-toggle" bindtap="onToggleGroups" data-id="{{item.id}}">
+        <text>{{item.groupsExpanded ? '收起明细' : '展开明细'}}</text>
+        <text class="arrow {{item.groupsExpanded ? 'up' : ''}}">▾</text>
+      </view>
+      <view class="groups" wx:if="{{item.groupsExpanded}}">
+        <view
+          class="group {{g.tint}}"
+          wx:for="{{item.groups}}"
+          wx:for-item="g"
+          wx:key="key"
+        >
+          <view class="group-head" bindtap="onToggleGroup" data-id="{{item.id}}" data-gkey="{{g.key}}">
+            <text>{{g.label}}</text>
+            <text class="group-total">{{g.totalText}}</text>
+            <text class="arrow {{g.expanded ? 'up' : ''}}">▾</text>
+          </view>
+          <view class="group-body" wx:if="{{g.expanded}}">
+            <view
+              class="field-row"
+              wx:for="{{g.fields}}"
+              wx:for-item="f"
+              wx:key="key"
+            >
+              <view class="field-label">
+                {{f.label}}
+                <text class="cmt-dot" wx:if="{{f.hasComment}}">●</text>
+              </view>
+              <view class="field-value">{{f.valueText}}</view>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="load-tip">
+    <text wx:if="{{loading}}">加载中…</text>
+    <text wx:elif="{{!hasMore && rows.length}}">没有更多了</text>
+    <text wx:elif="{{!rows.length && !loading}}">暂无数据，请调整筛选条件</text>
+  </view>
+</view>

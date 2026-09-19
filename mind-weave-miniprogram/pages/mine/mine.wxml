@@ -1,0 +1,44 @@
+<view class="page">
+  <view class="card user-card">
+    <view class="avatar">{{userInitial}}</view>
+    <view class="user-info">
+      <view class="user-name">{{user.displayName}}</view>
+      <view class="user-sub">{{user.username}} · {{roleLabel}}</view>
+    </view>
+  </view>
+
+  <view class="card menu-card">
+    <view class="menu-item" bindtap="goSalary">
+      <text>收支仪表盘</text>
+      <text class="menu-arrow">›</text>
+    </view>
+    <view class="menu-item" bindtap="goRecords">
+      <text>收支列表</text>
+      <text class="menu-arrow">›</text>
+    </view>
+    <view class="menu-item" bindtap="onTogglePwd">
+      <text>修改密码</text>
+      <text class="menu-arrow">›</text>
+    </view>
+    <view class="pwd-form" wx:if="{{showPwd}}">
+      <input class="pwd-input" password placeholder="原密码" placeholder-class="ph" value="{{oldPwd}}" bindinput="onOldPwd" />
+      <input class="pwd-input" password placeholder="新密码（至少 6 位）" placeholder-class="ph" value="{{newPwd}}" bindinput="onNewPwd" />
+      <input class="pwd-input" password placeholder="确认新密码" placeholder-class="ph" value="{{confirmPwd}}" bindinput="onConfirmPwd" />
+      <button class="btn-primary pwd-btn" size="mini" loading="{{pwdLoading}}" disabled="{{pwdLoading}}" bindtap="onChangePwd">
+        确认修改
+      </button>
+    </view>
+    <view class="menu-item" bindtap="onAbout">
+      <text>关于</text>
+      <text class="menu-arrow">›</text>
+    </view>
+  </view>
+
+  <view class="card menu-card">
+    <view class="menu-item" bindtap="onLogout">
+      <text class="danger">退出登录</text>
+    </view>
+  </view>
+  <view class="version-tip">MindWeave · 织脑 v1.0.0</view>
+  <view class="ai-fab" bindtap="openAi">AI</view>
+</view>

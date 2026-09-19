@@ -1,0 +1,80 @@
+<view class="page">
+  <view class="mode-bar">
+    <view class="chip {{mode === 'my' ? 'active' : ''}}" data-v="my" bindtap="onMode">我的文章</view>
+    <view class="chip {{mode === 'public' ? 'active' : ''}}" data-v="public" bindtap="onMode">公开文章</view>
+  </view>
+  <scroll-view scroll-x class="chip-bar">
+    <view class="chip {{categoryId === null ? 'active' : ''}}" data-id="" bindtap="onCat">全部分类</view>
+    <view class="chip {{categoryId === c.id ? 'active' : ''}}" wx:for="{{cats}}" wx:for-item="c" wx:key="id" data-id="{{c.id}}" bindtap="onCat">{{c.name}}</view>
+  </scroll-view>
+  <scroll-view scroll-x class="chip-bar">
+    <view class="chip {{status === '' ? 'active' : ''}}" data-v="" bindtap="onStatus">全部</view>
+    <view class="chip {{status === 'DRAFT' ? 'active' : ''}}" data-v="DRAFT" bindtap="onStatus">草稿</view>
+    <view class="chip {{status === 'PUBLISHED' ? 'active' : ''}}" data-v="PUBLISHED" bindtap="onStatus">已发布</view>
+  </scroll-view>
+
+  <view class="search-row">
+    <input class="search-input" placeholder="搜索标题" value="{{keyword}}" bindinput="onKeyword" confirm-type="search" bindconfirm="onSearch" />
+    <view class="btn-add" bindtap="openForm">＋新建</view>
+  </view>
+
+  <view class="card art-card" wx:for="{{rows}}" wx:key="id" data-id="{{item.id}}" bindtap="onOpen" bindlongpress="onLongPress">
+    <view class="art-title">{{item.title}}</view>
+    <view class="art-meta">
+      <text class="art-cat">{{item.categoryPath || '未分类'}}</text>
+      <text class="tag" wx:for="{{item.tagsArr}}" wx:for-item="t" wx:key="*this">{{t}}</text>
+    </view>
+    <view class="art-foot">
+      <text class="st {{item.status === 'PUBLISHED' ? 'pub' : ''}}">{{item.status === 'PUBLISHED' ? '已发布' : '草稿'}}</text>
+      <text class="art-time">{{item.updatedText}}</text>
+      <text class="art-share" data-id="{{item.id}}" catchtap="onShare">分享</text>
+    </view>
+  </view>
+
+  <view class="load-tip">
+    <text wx:if="{{loading}}">加载中…</text>
+    <text wx:elif="{{!hasMore && rows.length}}">没有更多了</text>
+  </view>
+
+  <view class="mask" wx:if="{{shareModal}}" bindtap="closeShare"></view>
+  <view class="sheet" wx:if="{{shareModal}}">
+    <view class="sheet-title">分享文章</view>
+    <view class="share-title">{{shareTitle}}</view>
+    <block wx:if="{{!shareLink}}">
+      <input class="ipt" type="number" placeholder="有效期（天），默认 7" value="{{shareDays}}" bindinput="onShareDays" />
+      <input class="ipt" placeholder="访问密码（可选）" value="{{sharePassword}}" bindinput="onSharePassword" />
+      <view class="sheet-btns">
+        <view class="btn ghost" bindtap="closeShare">取消</view>
+        <view class="btn primary" bindtap="genShare">生成分享链接</view>
+      </view>
+    </block>
+    <block wx:else>
+      <view class="share-link">{{shareLink}}</view>
+      <view class="sheet-btns">
+        <view class="btn ghost" bindtap="disableShare">取消分享</view>
+        <view class="btn primary" bindtap="copyShare">复制链接</view>
+      </view>
+    </block>
+  </view>
+
+  <view class="mask" wx:if="{{showForm}}" bindtap="closeForm"></view>
+  <view class="sheet" wx:if="{{showForm}}">
+    <view class="sheet-title">新建文章</view>
+    <input class="ipt" placeholder="标题（必填）" value="{{form.title}}" data-k="title" bindinput="onForm" />
+    <input class="ipt" placeholder="摘要（可选）" value="{{form.summary}}" data-k="summary" bindinput="onForm" />
+    <picker mode="selector" range="{{catNames}}" value="{{formCatIndex}}" bindchange="onFormCat">
+      <view class="ipt picker">分类：{{catNames[formCatIndex]}}</view>
+    </picker>
+    <input class="ipt" placeholder="标签，逗号分隔" value="{{form.tags}}" data-k="tags" bindinput="onForm" />
+    <view class="st-row">
+      <view class="st-chip {{form.status === 'DRAFT' ? 'active' : ''}}" data-v="DRAFT" bindtap="onFormStatus">草稿</view>
+      <view class="st-chip {{form.status === 'PUBLISHED' ? 'active' : ''}}" data-v="PUBLISHED" bindtap="onFormStatus">发布</view>
+    </view>
+    <textarea class="md-ipt" placeholder="Markdown 正文（图片/视频请在 Web 端插入）" value="{{form.contentMd}}" data-k="contentMd" bindinput="onForm" />
+    <view class="sheet-btns">
+      <view class="btn ghost" bindtap="closeForm">取消</view>
+      <view class="btn primary" bindtap="saveForm">保存</view>
+    </view>
+  </view>
+  <view class="ai-fab" bindtap="openAi">AI</view>
+</view>

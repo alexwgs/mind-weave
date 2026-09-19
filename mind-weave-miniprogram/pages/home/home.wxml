@@ -1,0 +1,63 @@
+<view class="page home-page">
+  <view class="hero">
+    <view class="hero-meta">
+      <text>MINDWEAVE / {{today}}</text>
+      <view class="sync"><text class="sync-dot"></text><text>正在编织</text></view>
+    </view>
+    <view class="hero-title">今天，继续编织。</view>
+    <view class="hero-sub">把一个想法放好，把一件小事做完。</view>
+    <view class="weave-track">
+      <text class="node active"></text><text class="thread"></text><text class="node"></text><text class="thread"></text><text class="node active"></text><text class="thread"></text><text class="node"></text>
+    </view>
+  </view>
+
+  <view class="rpg-entry" wx:if="{{rpg}}" bindtap="goRpg">
+    <view class="level-seal"><text class="level-label">LEVEL</text><text class="level-num">{{rpg.profile.level}}</text></view>
+    <view class="rpg-main">
+      <view class="rpg-top"><text class="rpg-kicker">LIFE RPG</text><text class="rpg-title">{{rpg.profile.title}}</text></view>
+      <view class="rpg-progress"><view style="width: {{rpg.profile.levelXp / rpg.profile.nextLevelXp * 100}}%"></view></view>
+      <view class="rpg-foot"><text>今日习惯 {{rpg.dailyQuest.checkedToday}} / {{rpg.dailyQuest.habitTotal}}</text><text>{{rpg.profile.levelXp}} XP</text></view>
+    </view>
+    <view class="rpg-arrow">→</view>
+  </view>
+
+  <swiper wx:if="{{covers.length}}" class="swiper" autoplay circular interval="4000" indicator-dots indicator-active-color="#ffffff">
+    <swiper-item wx:for="{{covers}}" wx:key="id">
+      <view class="swiper-item" data-id="{{item.id}}" bindtap="goArticle">
+        <image wx:if="{{item.hasImage}}" class="swiper-img" src="{{item.tmp}}" mode="aspectFill" />
+        <view wx:else class="swiper-ph"><text class="cover-mark">知识切片</text><text>{{item.title}}</text></view>
+        <view class="swiper-mask"></view>
+        <view class="swiper-title">{{item.title}}</view>
+      </view>
+    </swiper-item>
+  </swiper>
+
+  <view class="section-head">
+    <view><text class="section-kicker">KNOWLEDGE</text><text class="sec-title">最近沉淀</text></view>
+    <text class="sec-more" bindtap="goArticles">查看全部 →</text>
+  </view>
+  <view class="list-surface" wx:if="{{articles.length}}">
+    <view class="article-row" wx:for="{{articles}}" wx:key="id" data-id="{{item.id}}" bindtap="goArticle">
+      <view class="article-mark">✦</view>
+      <view class="article-copy"><text class="art-title">{{item.title}}</text><text class="art-meta">{{item.categoryPath}} · {{item.updatedText}}</text></view>
+      <text class="row-arrow">›</text>
+    </view>
+  </view>
+  <view wx:if="{{!articles.length && !loading}}" class="empty-tip">还没有沉淀内容，从一篇短笔记开始。</view>
+
+  <view class="section-head todo-head">
+    <view><text class="section-kicker">NEXT THREAD</text><text class="sec-title">接下来做</text></view>
+    <text class="sec-more" bindtap="goTodos">查看全部 →</text>
+  </view>
+  <view class="list-surface" wx:if="{{todos.length}}">
+    <view class="todo-row" wx:for="{{todos}}" wx:key="id">
+      <view class="todo-check"></view>
+      <view class="todo-copy"><text class="todo-title">{{item.title}}</text><text class="todo-meta">{{item.dueText}}{{item.project ? ' · ' + item.project : ''}}</text></view>
+      <text class="priority {{item.priClass}}">{{item.priText}}</text>
+    </view>
+  </view>
+  <view wx:if="{{!todos.length && !loading}}" class="empty-tip">今天的线头都收好了。</view>
+
+  <view class="load-tip" wx:if="{{loading}}">正在整理你的今日线索…</view>
+  <view class="ai-fab" bindtap="openAi">AI</view>
+</view>

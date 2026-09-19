@@ -1,0 +1,35 @@
+<view class="chat-page">
+  <view class="chat-head">
+    <text class="head-title">🤖 AI 助手</text>
+    <view class="head-clear" bindtap="clear">清空</view>
+  </view>
+
+  <scroll-view class="chat-body" scroll-y scroll-with-animation>
+    <view wx:if="{{!messages.length}}" class="chat-empty">
+      我可以帮你管理待办、查询工资、写文章、查保险箱凭证…
+    </view>
+    <view wx:for="{{messages}}" wx:key="index" class="msg-row {{item.role === 'user' ? 'right' : 'left'}}">
+      <view class="bubble {{item.role === 'user' ? 'mine' : 'ai'}}">
+        <text class="bubble-text" user-select>{{item.content}}</text>
+        <view wx:if="{{item.actions.length}}" class="bubble-actions">
+          <view class="act-tag">已调用 {{item.actions.length}} 个工具</view>
+          <view class="act-line" wx:for="{{item.actions}}" wx:for-item="a" wx:for-index="j" wx:key="j">{{a}}</view>
+        </view>
+      </view>
+    </view>
+    <view wx:if="{{loading}}" class="msg-row left">
+      <view class="bubble ai"><text class="bubble-text">正在思考…</text></view>
+    </view>
+    <view id="bottom"></view>
+  </scroll-view>
+
+  <view class="chat-foot">
+    <scroll-view scroll-x class="sugg-row">
+      <view class="sugg" wx:for="{{suggestions}}" wx:key="*this" data-s="{{item}}" bindtap="onSuggest">{{item}}</view>
+    </scroll-view>
+    <view class="input-row">
+      <input class="chat-input" placeholder="输入你的需求…" value="{{input}}" bindinput="onInput" confirm-type="send" bindconfirm="send" />
+      <view class="send-btn {{loading ? 'disabled' : ''}}" bindtap="send">发送</view>
+    </view>
+  </view>
+</view>

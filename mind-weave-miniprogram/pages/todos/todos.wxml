@@ -1,0 +1,146 @@
+<view class="page">
+  <view class="todo-overview">
+    <view><text class="overview-num">{{summary.active || 0}}</text><text>进行中</text></view>
+    <view><text class="overview-num">{{summary.today || 0}}</text><text>今天到期</text></view>
+    <view class="alert"><text class="overview-num">{{summary.overdue || 0}}</text><text>已逾期</text></view>
+    <view><text class="overview-num">{{summary.withReminder || 0}}</text><text>已设提醒</text></view>
+  </view>
+
+  <view class="push-card {{pushStatus.deliveryReady ? 'ready' : 'warning'}}" wx:if="{{pushStatus}}">
+    <view class="push-icon">◷</view>
+    <view class="push-copy"><text class="push-title">{{pushStatus.deliveryReady ? '定时推送已就绪' : '定时扫描运行中'}}</text><text>{{pushStatus.deliveryReady ? ((pushStatus.barkConfigured ? 'Bark ' : '') + (pushStatus.wxConfigured ? '微信订阅消息' : '') + ' · 每 ' + pushStatus.scanIntervalSeconds + ' 秒扫描') : '尚未配置可用推送渠道'}}</text><text wx:if="{{pushStatus.nextReminderAt}}">下一次：{{pushStatus.nextReminderAt}}</text></view>
+    <view class="push-dot"></view>
+  </view>
+
+  <view class="toolbar">
+    <scroll-view scroll-x class="chip-scroll" enhanced show-scrollbar="{{false}}">
+      <view class="chip {{status === 'active' ? 'active' : ''}}" data-v="active" bindtap="onStatus">进行中</view>
+      <view class="chip {{status === 'today' ? 'active' : ''}}" data-v="today" bindtap="onStatus">今天</view>
+      <view class="chip {{status === 'overdue' ? 'active' : ''}}" data-v="overdue" bindtap="onStatus">逾期</view>
+      <view class="chip {{status === 'upcoming' ? 'active' : ''}}" data-v="upcoming" bindtap="onStatus">未来 7 天</view>
+      <view class="chip {{status === 'done' ? 'active' : ''}}" data-v="done" bindtap="onStatus">已完成</view>
+      <view class="chip {{status === '' ? 'active' : ''}}" data-v="" bindtap="onStatus">全部</view>
+    </scroll-view>
+    <view class="btn-add" bindtap="openForm">＋</view>
+  </view>
+
+  <view class="swipe-wrap" wx:for="{{rows}}" wx:key="id" data-id="{{item.id}}">
+    <view class="swipe-actions">
+      <view class="act edit" data-id="{{item.id}}" bindtap="onEditTodo">编辑</view>
+      <view class="act del" data-id="{{item.id}}" bindtap="onDeleteTodo">删除</view>
+    </view>
+    <view class="card todo-card {{swipeId === item.id ? 'open' : ''}} {{busyId === item.id ? 'busy' : ''}}" data-id="{{item.id}}" bindtouchstart="onTouchStart" bindtouchmove="onTouchMove" bindtouchend="onTouchEnd" bindtap="onToggleExpand" bindlongpress="onLongPress">
+      <view class="todo-main">
+        <view class="check {{item.done ? 'checked' : ''}}" data-id="{{item.id}}" catchtap="toggle">{{item.done ? '✓' : ''}}</view>
+        <view class="todo-body">
+          <view class="todo-title {{item.done ? 'done' : ''}}">{{item.title}}</view>
+          <view class="todo-meta">
+            <text class="pri {{item.priority}}">{{item.priority === 'HIGH' ? '高' : (item.priority === 'LOW' ? '低' : '中')}}</text>
+            <text wx:if="{{item.project}}">{{item.project}}</text>
+            <text wx:if="{{item.dueTime}}">截止 {{item.dueText}}</text>
+          </view>
+        </view>
+      </view>
+      <view class="todo-detail" wx:if="{{item.expanded}}">
+        <view class="detail-row" wx:if="{{item.remindTime}}">
+          <text class="dl">提醒时间</text>
+          <text class="dv">{{item.remindText}}</text>
+        </view>
+        <view class="detail-row" wx:if="{{item.remindNote}}">
+          <text class="dl">提醒内容</text>
+          <text class="dv">{{item.remindNote}}</text>
+        </view>
+        <view class="detail-row" wx:if="{{item.recurRule}}">
+          <text class="dl">循环规则</text>
+          <text class="dv">{{item.recurText}}</text>
+        </view>
+        <view class="detail-row" wx:if="{{item.subs.length}}">
+          <text class="dl">子任务</text>
+          <view class="dv subs">
+            <view wx:for="{{item.subs}}" wx:for-item="s" wx:key="id" class="sub">{{s.done ? '☑' : '☐'}} {{s.title}}</view>
+          </view>
+        </view>
+      </view>
+      <view class="todo-foot">
+        <text>{{item.expanded ? '收起' : '展开详情'}}</text>
+        <text class="foot-arrow {{item.expanded ? 'up' : ''}}">▾</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="load-tip">
+    <text wx:if="{{loading}}">加载中…</text>
+    <text wx:elif="{{!hasMore && rows.length}}">没有更多了</text>
+    <text wx:elif="{{!rows.length && !loading}}">暂无待办</text>
+  </view>
+
+  <view class="mask" wx:if="{{showForm}}" bindtap="closeForm"></view>
+  <view class="sheet" wx:if="{{showForm}}">
+    <view class="sheet-grip"></view>
+    <view class="sheet-title">{{form.id ? '编辑待办' : '新建待办'}}</view>
+    <input class="ipt" placeholder="标题（必填）" value="{{form.title}}" data-k="title" bindinput="onForm" />
+    <view class="tag-row">
+      <view class="tag-chip {{form.project === t ? 'active' : ''}}" wx:for="{{presetTags}}" wx:key="*this" data-v="{{t}}" bindtap="onPresetTag">{{t}}</view>
+    </view>
+    <input class="ipt" placeholder="项目/标签（可选择或自定义）" value="{{form.project}}" data-k="project" bindinput="onForm" />
+    <picker mode="selector" range="{{priorities}}" value="{{priorityIndex}}" bindchange="onPriority">
+      <view class="ipt picker">优先级：{{priorities[priorityIndex]}}</view>
+    </picker>
+    <view class="field-head"><text>截止时间</text><view class="mini-actions"><text data-v="today" bindtap="setDuePreset">今晚</text><text data-v="tomorrow" bindtap="setDuePreset">明早</text><text wx:if="{{form.dueDate}}" data-v="clear" bindtap="setDuePreset">清除</text></view></view>
+    <view class="dt-row">
+      <picker mode="date" value="{{form.dueDate}}" data-k="dueDate" bindchange="onForm">
+        <view class="ipt picker flex1">{{form.dueDate || '选择截止日期'}}</view>
+      </picker>
+      <picker mode="time" value="{{form.dueTime}}" data-k="dueTime" bindchange="onForm">
+        <view class="ipt picker">{{form.dueTime || '时间'}}</view>
+      </picker>
+    </view>
+
+    <view class="field-head"><text>单独提醒</text><text class="toggle-remind {{form.remindDate ? 'on' : ''}}" bindtap="enableReminder">{{form.remindDate ? '已开启' : '开启'}}</text></view>
+    <view class="dt-row" wx:if="{{form.remindDate}}">
+      <picker mode="date" value="{{form.remindDate}}" data-k="remindDate" bindchange="onForm">
+        <view class="ipt picker flex1">{{form.remindDate}}</view>
+      </picker>
+      <picker mode="time" value="{{form.remindTime}}" data-k="remindTime" bindchange="onForm">
+        <view class="ipt picker">{{form.remindTime || '09:00'}}</view>
+      </picker>
+    </view>
+    <view class="remind-presets" wx:if="{{form.remindDate && form.dueDate}}"><text data-v="0" bindtap="setReminderPreset">截止时</text><text data-v="10" bindtap="setReminderPreset">提前10分</text><text data-v="60" bindtap="setReminderPreset">提前1小时</text><text data-v="1440" bindtap="setReminderPreset">提前1天</text></view>
+    <input class="ipt" wx:if="{{form.remindDate}}" placeholder="提醒内容（可选，推送文案）" value="{{form.remindNote}}" data-k="remindNote" bindinput="onForm" />
+    <view class="sub-title">循环规则</view>
+    <view class="tag-row">
+      <view class="tag-chip {{form.recurType === '' ? 'active' : ''}}" data-v="" bindtap="onRecurType">不循环</view>
+      <view class="tag-chip {{form.recurType === 'DAILY' ? 'active' : ''}}" data-v="DAILY" bindtap="onRecurType">每天</view>
+      <view class="tag-chip {{form.recurType === 'WEEKLY' ? 'active' : ''}}" data-v="WEEKLY" bindtap="onRecurType">每周</view>
+      <view class="tag-chip {{form.recurType === 'MONTHLY' ? 'active' : ''}}" data-v="MONTHLY" bindtap="onRecurType">每月</view>
+    </view>
+    <view class="tag-row" wx:if="{{form.recurType === 'WEEKLY'}}">
+      <view class="tag-chip {{form.recurDaySet[c.value] ? 'active' : ''}}" wx:for="{{weekChips}}" wx:for-item="c" wx:key="value" data-v="{{c.value}}" bindtap="onRecurDayToggle">{{c.label}}</view>
+    </view>
+    <view class="dt-row" wx:if="{{form.recurType === 'WEEKLY' || form.recurType === 'MONTHLY'}}">
+      <picker wx:if="{{form.recurType === 'MONTHLY'}}" mode="selector" range="{{monthDayOptions}}" bindchange="onRecurDay">
+        <view class="ipt picker flex1">{{form.recurDayLabel}}</view>
+      </picker>
+      <picker mode="time" value="{{form.recurTime}}" bindchange="onRecurTime">
+        <view class="ipt picker">{{form.recurTime}}</view>
+      </picker>
+    </view>
+    <view class="dt-row" wx:if="{{form.recurType === 'DAILY'}}">
+      <picker mode="time" value="{{form.recurTime}}" bindchange="onRecurTime">
+        <view class="ipt picker flex1">每天 {{form.recurTime}}</view>
+      </picker>
+    </view>
+    <view class="sub-title">子任务
+      <text class="sub-add" bindtap="addSub">＋添加</text>
+    </view>
+    <view class="sub-row" wx:for="{{form.subs}}" wx:for-item="s" wx:for-index="i" wx:key="i">
+      <input class="ipt flex1" placeholder="子任务" value="{{s.title}}" data-i="{{i}}" bindinput="onSub" />
+      <view class="sub-del" data-i="{{i}}" bindtap="removeSub">✕</view>
+    </view>
+    <view class="sheet-btns">
+      <view class="btn ghost" bindtap="closeForm">取消</view>
+      <view class="btn primary {{saving ? 'disabled' : ''}}" bindtap="saveForm">{{saving ? '保存中…' : '保存'}}</view>
+    </view>
+  </view>
+  <view class="ai-fab" bindtap="openAi">AI</view>
+</view>

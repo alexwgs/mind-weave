@@ -1,0 +1,15 @@
+[Unit]
+Description=MindWeave Backend (Spring Boot) - CLI fallback when panel has no process guard
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/vol1/1000/dev/mind-weave-backend
+Environment=TZ=Asia/Shanghai
+ExecStart=/usr/bin/java -Xms256m -Xmx768m -jar /vol1/1000/dev/mind-weave-backend/mind-weave-backend-1.0.0.jar --spring.profiles.active=prod --spring.config.additional-location=file:/vol1/1000/dev/mind-weave-backend/
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

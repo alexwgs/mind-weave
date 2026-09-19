@@ -1,0 +1,583 @@
+/* ============================================================================
+   菌丝体 · 知识花园 —— 公开前台（/blog）
+   独立配色系统，与后台管理端的浅紫主题完全隔离（所有变量挂在 .mycelium-root 上）
+   ========================================================================= */
+
+/* 标题用衬线体。字体由远程提供时可能加载失败（无网/被墙），
+   所以下方的系统衬线回退链是必需的，不能只依赖 webfont。 */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;600;700&family=Inter:wght@400;500;600&display=swap');
+
+.mycelium-root {
+  /* 色板：幽林菌床 */
+  --my-beddeeps: #070d0b;
+  --my-bed: #0b1210;
+  --my-surface: #121c19;
+  --my-moss: #24382f;
+  --my-sage: #8fb3a1;
+  --my-spore: #d9ffe8;
+  --my-glow: #4fd39a;
+  --my-tan: #d9a06a;
+  --my-ink: #e8f4ec;
+  --my-muted: #8fa79b;
+
+  --my-max: 1180px;
+  --my-radius: 24px;
+  --my-display: 'Noto Serif SC', 'Songti SC', 'SimSun', 'Source Han Serif SC', serif;
+  --my-body: 'PingFang SC', 'HarmonyOS Sans SC', 'Microsoft YaHei', 'Segoe UI', system-ui, sans-serif;
+  --my-util: 'Inter', 'SF Mono', 'JetBrains Mono', 'Consolas', ui-monospace, monospace;
+
+  position: relative;
+  min-height: 100dvh;
+  background: var(--my-bed);
+  color: var(--my-ink);
+  font-family: var(--my-body);
+  font-synthesis-weight: none;
+  overflow-x: clip;
+}
+
+/* 菌床光晕：两处极淡的径向呼吸，替代纯色平面 */
+.mycelium-root::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(58% 42% at 76% 4%, rgba(79, 211, 154, .13), transparent 62%),
+    radial-gradient(48% 38% at 8% 30%, rgba(217, 160, 106, .09), transparent 60%),
+    linear-gradient(180deg, rgba(18, 28, 25, .5) 0%, transparent 34%);
+}
+
+/* 孢子颗粒质感，避免大面积纯色的塑料感 */
+.mycelium-root::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: .5;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.05'/%3E%3C/svg%3E");
+}
+
+.mycelium-root a { color: inherit; text-decoration: none; }
+.mycelium-root ::selection { background: rgba(79, 211, 154, .3); }
+.mycelium-shell { position: relative; z-index: 1; }
+
+/* ---------------------------------------------------------------- 顶栏 --- */
+.mycelium-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px clamp(18px, 4vw, 44px);
+  background: rgba(11, 18, 16, .74);
+  backdrop-filter: blur(16px) saturate(1.3);
+  -webkit-backdrop-filter: blur(16px) saturate(1.3);
+  border-bottom: 1px solid rgba(143, 179, 161, .1);
+}
+
+.mycelium-brand { display: flex; align-items: center; gap: 11px; letter-spacing: .04em; }
+.mycelium-brand svg { flex: none; }
+.mycelium-brand-name { font-family: var(--my-display); font-size: 17px; font-weight: 600; letter-spacing: .12em; }
+.mycelium-brand-sub {
+  font-family: var(--my-util);
+  font-size: 10px;
+  letter-spacing: .3em;
+  color: var(--my-muted);
+  text-transform: uppercase;
+}
+
+.mycelium-nav { display: flex; align-items: center; gap: 6px; margin-left: auto; }
+.mycelium-nav a {
+  padding: 7px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  color: var(--my-muted);
+  transition: color .3s ease, background .3s ease;
+}
+.mycelium-nav a:hover { color: var(--my-spore); background: rgba(143, 179, 161, .1); }
+
+.mycelium-admin-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 15px;
+  border-radius: 999px;
+  border: 1px solid rgba(79, 211, 154, .34);
+  font-size: 13px;
+  color: var(--my-glow) !important;
+  transition: background .3s ease, box-shadow .3s ease;
+}
+.mycelium-admin-link:hover { background: rgba(79, 211, 154, .12); box-shadow: 0 0 22px rgba(79, 211, 154, .22); }
+
+/* ----------------------------------------------------------------- 首屏 --- */
+.mycelium-hero {
+  position: relative;
+  min-height: min(76dvh, 660px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(48px, 7vh, 84px) clamp(18px, 4vw, 44px) clamp(44px, 6vh, 68px);
+  overflow: hidden;
+}
+
+.mycelium-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+  opacity: 0;
+  transform: scale(1.08);
+  transition: opacity 1.3s ease, transform 1.9s cubic-bezier(.16, .84, .3, 1);
+}
+.mycelium-canvas.is-ready { opacity: 1; transform: scale(1); }
+
+.mycelium-hero-inner { position: relative; width: 100%; max-width: var(--my-max); margin: 0 auto; }
+
+.mycelium-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-family: var(--my-util);
+  font-size: 11px;
+  letter-spacing: .26em;
+  text-transform: uppercase;
+  color: var(--my-glow);
+  padding: 7px 15px;
+  border-radius: 999px;
+  border: 1px solid rgba(79, 211, 154, .24);
+  background: rgba(18, 28, 25, .6);
+}
+.mycelium-eyebrow i {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--my-glow);
+  box-shadow: 0 0 10px var(--my-glow);
+  animation: my-pulse 2.6s ease-in-out infinite;
+}
+
+.mycelium-title {
+  font-family: var(--my-display);
+  font-weight: 600;
+  font-size: clamp(40px, 7.4vw, 90px);
+  line-height: 1.1;
+  letter-spacing: -.015em;
+  margin: 26px 0 0;
+  max-width: 15em;
+  text-wrap: balance;
+}
+
+/* 逐字入场：字从孢子里长出来（要快，别让首屏标题长时间糊着） */
+.mycelium-title .my-char {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(.4em) scale(.9) rotate(4deg);
+  filter: blur(6px);
+  animation: my-char-in .72s cubic-bezier(.2, .8, .25, 1) forwards;
+  animation-delay: calc(var(--i) * 26ms + 130ms);
+}
+@keyframes my-char-in {
+  to { opacity: 1; transform: none; filter: blur(0); }
+}
+
+.mycelium-lede {
+  margin: 26px 0 0;
+  max-width: 40em;
+  font-size: clamp(15px, 1.35vw, 17.5px);
+  line-height: 1.95;
+  color: #b6cdc1;
+  opacity: 0;
+  animation: my-rise .75s ease forwards;
+  animation-delay: .5s;
+}
+.mycelium-lede b { color: var(--my-spore); font-weight: 500; }
+
+.mycelium-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 520px;
+  margin-top: 38px;
+  padding: 7px 7px 7px 18px;
+  border-radius: 18px 6px 18px 6px;
+  border: 1px solid rgba(143, 179, 161, .2);
+  background: rgba(18, 28, 25, .74);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: border-color .35s ease, box-shadow .35s ease;
+  opacity: 0;
+  animation: my-rise .75s ease forwards;
+  animation-delay: .65s;
+}
+.mycelium-search:focus-within { border-color: rgba(79, 211, 154, .55); box-shadow: 0 0 0 4px rgba(79, 211, 154, .1), 0 18px 44px -22px rgba(79, 211, 154, .5); }
+.mycelium-search svg { flex: none; color: var(--my-muted); }
+.mycelium-search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: var(--my-ink);
+  font-size: 15px;
+  padding: 10px 0;
+  outline: none;
+}
+.mycelium-search input::placeholder { color: #6d8478; }
+.mycelium-search button {
+  flex: none;
+  padding: 10px 21px;
+  border: 0;
+  border-radius: 13px 4px 13px 4px;
+  background: var(--my-glow);
+  color: #04140d;
+  font-size: 14px;
+  font-weight: 600;
+  transition: transform .3s cubic-bezier(.2, .8, .3, 1), box-shadow .3s ease;
+}
+.mycelium-search button:hover { transform: translateY(-2px); box-shadow: 0 12px 26px -12px rgba(79, 211, 154, .85); }
+.mycelium-search button:active { transform: translateY(0); }
+
+/* 分层统计：每块轻微不同景深，像悬在空气里 */
+.mycelium-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(22px, 4vw, 52px);
+  margin-top: clamp(46px, 6vh, 72px);
+  opacity: 0;
+  animation: my-rise .8s ease forwards;
+  animation-delay: .8s;
+}
+.mycelium-stat { transform: translateZ(0); }
+.mycelium-stat-num {
+  font-family: var(--my-display);
+  font-size: clamp(30px, 3.4vw, 42px);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -.02em;
+  display: block;
+}
+.mycelium-stat-label {
+  display: block;
+  margin-top: 10px;
+  font-family: var(--my-util);
+  font-size: 11px;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--my-muted);
+}
+.mycelium-stat:nth-child(1) { transform: perspective(900px) translateZ(28px); }
+.mycelium-stat:nth-child(2) { transform: perspective(900px) translateZ(14px); }
+.mycelium-stat:nth-child(3) { transform: perspective(900px) translateZ(4px); }
+
+@keyframes my-rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+@keyframes my-pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: .45; transform: scale(.7); } }
+
+/* --------------------------------------------------------------- 菌络网 --- */
+.mycelium-network { padding: clamp(48px, 6.5vh, 82px) clamp(18px, 4vw, 44px) 0; }
+.mycelium-network-inner { width: 100%; max-width: var(--my-max); margin: 0 auto; }
+
+.mycelium-network-head { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 18px; }
+.mycelium-network-head h2 {
+  font-family: var(--my-display);
+  font-size: clamp(21px, 2.1vw, 27px);
+  font-weight: 600;
+  margin: 0;
+  letter-spacing: -.01em;
+}
+.mycelium-network-head p { margin: 9px 0 0; font-size: 13.5px; color: var(--my-muted); line-height: 1.8; max-width: 46em; }
+.mycelium-count { margin-left: auto; font-family: var(--my-util); font-size: 12px; color: var(--my-muted); letter-spacing: .1em; }
+
+.mycelium-taxa { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 26px; }
+.mycelium-taxon {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 17px;
+  border-radius: 999px;
+  border: 1px solid rgba(143, 179, 161, .18);
+  background: rgba(18, 28, 25, .56);
+  color: #b6cdc1;
+  font-size: 13.5px;
+  transition: transform .3s cubic-bezier(.2, .8, .3, 1), border-color .3s ease, color .3s ease, background .3s ease;
+}
+.mycelium-taxon i { width: 7px; height: 7px; border-radius: 50%; flex: none; box-shadow: 0 0 8px currentColor; }
+.mycelium-taxon em { font-family: var(--my-util); font-style: normal; font-size: 11px; opacity: .68; }
+.mycelium-taxon:hover { transform: translateY(-2px); border-color: rgba(143, 179, 161, .45); color: var(--my-spore); }
+.mycelium-taxon.is-active {
+  border-color: currentColor;
+  background: rgba(79, 211, 154, .1);
+  color: var(--my-spore);
+}
+.mycelium-taxon.is-active i { animation: my-pulse 2s ease-in-out infinite; }
+
+/* -------------------------------------------------------------- 标本卡 --- */
+.mycelium-specimens {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(322px, 1fr));
+  gap: 22px;
+  margin-top: 34px;
+  perspective: 1400px;
+}
+
+.mycelium-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 252px;
+  padding: 26px 26px 22px;
+  border-radius: var(--my-radius) 8px var(--my-radius) 8px;
+  border: 1px solid rgba(143, 179, 161, .13);
+  background:
+    linear-gradient(158deg, rgba(36, 56, 47, .5) 0%, rgba(18, 28, 25, .82) 58%),
+    var(--my-surface);
+  overflow: hidden;
+  transform-style: preserve-3d;
+  opacity: 0;
+  transform: translateY(28px);
+  box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+  /* --d 由 React 按索引注入，卡片像菌丝一样依次冒头 */
+  transition:
+    opacity .75s ease var(--d, 0ms),
+    transform .75s cubic-bezier(.2, .8, .3, 1) var(--d, 0ms),
+    border-color .5s ease,
+    box-shadow .5s ease;
+}
+.mycelium-card.is-in { opacity: 1; transform: none; }
+.mycelium-card.is-in:hover {
+  border-color: rgba(79, 211, 154, .4);
+  transform: translateY(-7px) rotateX(2.2deg) rotateY(-2deg);
+  box-shadow: 0 30px 62px -28px rgba(0, 0, 0, .85), 0 0 0 1px rgba(79, 211, 154, .12);
+  /* 悬停/移出必须立刻响应，不能被入场错峰延迟拖住 */
+  transition:
+    opacity .3s ease,
+    transform .5s cubic-bezier(.2, .8, .3, 1),
+    border-color .5s ease,
+    box-shadow .5s ease;
+}
+
+/* 群落色刺：左侧一条会发光的菌丝 */
+.mycelium-card-spine {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: var(--taxon);
+  opacity: .5;
+  transition: opacity .45s ease, box-shadow .45s ease, width .45s ease;
+}
+.mycelium-card:hover .mycelium-card-spine { opacity: 1; width: 4px; box-shadow: 0 0 20px 2px var(--taxon); }
+
+/* 悬停时从指针处渗出的光斑 */
+.mycelium-card::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .45s ease;
+  background: radial-gradient(340px circle at var(--px, 50%) var(--py, 0%), rgba(79, 211, 154, .13), transparent 62%);
+}
+.mycelium-card:hover::before { opacity: 1; }
+
+.mycelium-card-top { display: flex; align-items: center; gap: 9px; margin-bottom: 17px; }
+.mycelium-taxon-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--my-util);
+  font-size: 10.5px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--taxon);
+  padding: 5px 11px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--taxon) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--taxon) 32%, transparent);
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.mycelium-featured {
+  flex: none;
+  font-family: var(--my-util);
+  font-size: 10px;
+  letter-spacing: .16em;
+  color: var(--my-tan);
+  border: 1px solid rgba(217, 160, 106, .4);
+  padding: 4px 9px;
+  border-radius: 999px;
+}
+
+/* 帖主未开启分享：只放出预览 */
+.mycelium-locked-tag {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--my-util);
+  font-size: 10px;
+  letter-spacing: .14em;
+  color: var(--my-sage);
+  border: 1px solid rgba(143, 179, 161, .38);
+  padding: 4px 9px;
+  border-radius: 999px;
+  margin-left: auto;
+}
+
+.mycelium-card h3 {
+  font-family: var(--my-display);
+  font-size: 19.5px;
+  font-weight: 600;
+  line-height: 1.58;
+  margin: 0 0 13px;
+  letter-spacing: -.005em;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  transition: color .35s ease;
+}
+.mycelium-card:hover h3 { color: var(--my-spore); }
+
+.mycelium-card-summary {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.85;
+  color: #9cb3a7;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  flex: 1;
+}
+.mycelium-card-summary.is-empty { color: #63776d; font-style: italic; }
+
+.mycelium-card-foot {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid rgba(143, 179, 161, .1);
+  font-family: var(--my-util);
+  font-size: 11.5px;
+  color: var(--my-muted);
+  letter-spacing: .04em;
+}
+.mycelium-card-foot .my-dot { width: 3px; height: 3px; border-radius: 50%; background: currentColor; opacity: .5; }
+.mycelium-card-arrow { margin-left: auto; color: var(--my-glow); opacity: 0; transform: translateX(-7px); transition: opacity .4s ease, transform .4s cubic-bezier(.2, .8, .3, 1); }
+.mycelium-card:hover .mycelium-card-arrow { opacity: 1; transform: none; }
+
+/* 生长天数：越新越亮，像新冒出的菌丝 */
+.mycelium-growth { display: inline-flex; align-items: center; gap: 6px; }
+.mycelium-growth i {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--my-glow);
+  box-shadow: 0 0 8px var(--my-glow);
+  opacity: var(--fresh, .4);
+}
+.mycelium-growth.is-stale i { background: var(--my-muted); box-shadow: none; }
+
+/* ------------------------------------------------------------ 状态视图 --- */
+.mycelium-state {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: clamp(56px, 9vh, 96px) 24px;
+  text-align: center;
+  border-radius: var(--my-radius) 8px var(--my-radius) 8px;
+  border: 1px dashed rgba(143, 179, 161, .22);
+  background: rgba(18, 28, 25, .34);
+}
+.mycelium-state h3 { font-family: var(--my-display); font-size: 19px; font-weight: 600; margin: 0; }
+.mycelium-state p { margin: 0; font-size: 13.5px; color: var(--my-muted); line-height: 1.85; max-width: 36em; }
+.mycelium-state button {
+  margin-top: 6px;
+  padding: 10px 22px;
+  border-radius: 13px 4px 13px 4px;
+  border: 1px solid rgba(79, 211, 154, .4);
+  background: rgba(79, 211, 154, .1);
+  color: var(--my-glow);
+  font-size: 13.5px;
+  transition: background .3s ease, transform .3s ease;
+}
+.mycelium-state button:hover { background: rgba(79, 211, 154, .18); transform: translateY(-2px); }
+
+/* 骨架屏：孢子缓缓呼吸 */
+.mycelium-skeleton {
+  min-height: 252px;
+  border-radius: var(--my-radius) 8px var(--my-radius) 8px;
+  border: 1px solid rgba(143, 179, 161, .09);
+  background: linear-gradient(100deg, rgba(36, 56, 47, .32) 30%, rgba(52, 78, 66, .5) 50%, rgba(36, 56, 47, .32) 70%);
+  background-size: 220% 100%;
+  animation: my-shimmer 1.7s ease-in-out infinite;
+}
+@keyframes my-shimmer { from { background-position: 140% 0; } to { background-position: -40% 0; } }
+
+.mycelium-more { display: flex; justify-content: center; margin-top: 40px; }
+.mycelium-more button {
+  padding: 13px 34px;
+  border-radius: 15px 5px 15px 5px;
+  border: 1px solid rgba(143, 179, 161, .28);
+  background: rgba(18, 28, 25, .7);
+  color: var(--my-ink);
+  font-size: 14px;
+  letter-spacing: .04em;
+  transition: border-color .35s ease, transform .35s cubic-bezier(.2, .8, .3, 1), box-shadow .35s ease;
+}
+.mycelium-more button:hover { border-color: var(--my-glow); transform: translateY(-3px); box-shadow: 0 18px 38px -20px rgba(79, 211, 154, .7); }
+
+/* ----------------------------------------------------------------- 页脚 --- */
+.mycelium-footer {
+  margin-top: clamp(72px, 10vh, 120px);
+  padding: 34px clamp(18px, 4vw, 44px) 46px;
+  border-top: 1px solid rgba(143, 179, 161, .1);
+}
+.mycelium-footer-inner {
+  max-width: var(--my-max);
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--my-util);
+  font-size: 11.5px;
+  letter-spacing: .1em;
+  color: var(--my-muted);
+}
+.mycelium-footer-inner a { color: var(--my-sage); transition: color .3s ease; }
+.mycelium-footer-inner a:hover { color: var(--my-glow); }
+.mycelium-footer-inner .my-spacer { margin-left: auto; }
+
+/* --------------------------------------------------------------- 自适应 --- */
+@media (max-width: 720px) {
+  .mycelium-hero { min-height: auto; padding-top: 56px; }
+  .mycelium-specimens { grid-template-columns: 1fr; gap: 16px; }
+  .mycelium-card { min-height: 0; padding: 22px 20px 19px; }
+  .mycelium-card:hover { transform: translateY(-4px); }
+  .mycelium-stats { gap: 26px; }
+  .mycelium-stat, .mycelium-stat:nth-child(n) { transform: none; }
+  .mycelium-brand-sub { display: none; }
+  .mycelium-nav a { padding: 7px 11px; }
+  .mycelium-count { margin-left: 0; }
+}
+
+/* 尊重系统的减弱动效偏好：一律回到静态可读状态 */
+@media (prefers-reduced-motion: reduce) {
+  .mycelium-root *,
+  .mycelium-root *::before,
+  .mycelium-root *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+  }
+  .mycelium-title .my-char { opacity: 1; transform: none; filter: none; }
+  .mycelium-lede, .mycelium-search, .mycelium-stats { opacity: 1; }
+  .mycelium-card { opacity: 1; }
+  .mycelium-canvas { opacity: 1; transform: none; }
+  .mycelium-hero-inner, .mycelium-stats { transform: none !important; }
+  .mycelium-card:hover { transform: none; }
+}

@@ -1,0 +1,83 @@
+<view class="page" wx:if="{{rec}}">
+  <view class="card head-card">
+    <view class="head-top">
+      <view class="head-month">{{rec.monthLabel}}</view>
+      <view class="head-grade" wx:if="{{rec.grade}}">{{rec.grade}}</view>
+    </view>
+    <view class="head-nums">
+      <view class="head-num">
+        <view class="hn-label">实发金额</view>
+        <view class="hn-value">{{rec.netPayText}}</view>
+      </view>
+      <view class="head-num">
+        <view class="hn-label">另发奖金</view>
+        <view class="hn-value">{{rec.extraText}}</view>
+      </view>
+      <view class="head-num">
+        <view class="hn-label">总薪资</view>
+        <view class="hn-value">{{rec.totalText}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="card key-rows">
+    <view class="key-row">
+      <text>加项合计</text>
+      <text class="kv">{{rec.totalIncomeText}}</text>
+    </view>
+    <view class="key-row g-deduction-row">
+      <text>扣项合计</text>
+      <text class="kv">{{rec.totalDeductionText}}</text>
+    </view>
+    <view class="key-row">
+      <text>实发金额</text>
+      <text class="kv strong">{{rec.netPayText}}</text>
+    </view>
+    <view class="key-row g-extra-row">
+      <text>另发奖金</text>
+      <text class="kv">{{rec.extraText}}</text>
+    </view>
+    <view class="key-row">
+      <text>总薪资</text>
+      <text class="kv strong">{{rec.totalText}}</text>
+    </view>
+    <view class="key-row g-company-row">
+      <text>公司合计</text>
+      <text class="kv">{{rec.companyTotalText}}</text>
+    </view>
+  </view>
+
+  <view class="card group-card {{g.tint}}" wx:for="{{rec.groups}}" wx:for-item="g" wx:key="key">
+    <view class="group-head" bindtap="onToggle" data-key="{{g.key}}">
+      <text>{{g.label}}</text>
+      <text class="group-total">{{g.totalText}}</text>
+      <text class="arrow {{g.expanded ? 'up' : ''}}">▾</text>
+    </view>
+    <view class="group-body" wx:if="{{g.expanded}}">
+      <view class="field-row" wx:for="{{g.fields}}" wx:for-item="f" wx:key="key">
+        <view class="field-label">
+          {{f.label}}
+          <text class="cmt-dot" wx:if="{{f.hasComment}}">●</text>
+        </view>
+        <view class="field-value">{{f.valueText}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="card comments-card">
+    <view class="comments-title">批注（{{rec.comments.length}}）</view>
+    <block wx:if="{{rec.comments.length}}">
+      <view class="comment-item" wx:for="{{rec.comments}}" wx:key="id">
+        <view class="comment-head">
+          <text class="comment-field">{{item.fieldLabel}}</text>
+          <text class="comment-time">{{item.createdAtText}}</text>
+        </view>
+        <view class="comment-content">{{item.content}}</view>
+        <view class="comment-author" wx:if="{{item.author}}">—— {{item.author}}</view>
+      </view>
+    </block>
+    <view class="comment-empty" wx:else>暂无批注</view>
+  </view>
+</view>
+
+<view class="page loading-page" wx:elif="{{loading}}">加载中…</view>

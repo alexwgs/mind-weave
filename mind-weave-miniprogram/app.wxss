@@ -1,0 +1,134 @@
+page {
+  background: #f4f3f0;
+  color: #242437;
+  font-size: 28rpx;
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.page {
+  box-sizing: border-box;
+  min-height: 100vh;
+  padding: 24rpx 28rpx 64rpx;
+}
+
+.card {
+  margin-bottom: 18rpx;
+  padding: 26rpx;
+  border: 1rpx solid #e7e4ec;
+  border-radius: 24rpx;
+  background: #ffffff;
+  box-shadow: 0 8rpx 26rpx rgba(36, 36, 55, 0.035);
+}
+
+button::after {
+  border: 0;
+}
+
+.btn-primary {
+  margin-top: 28rpx;
+  border-radius: 16rpx;
+  color: #ffffff;
+  background: #6658cc;
+  font-size: 29rpx;
+  font-weight: 600;
+}
+
+.btn-primary[disabled] {
+  color: #ffffff;
+  opacity: 0.55;
+}
+
+.arrow {
+  transition: transform 0.2s;
+}
+
+.arrow.up {
+  transform: rotate(180deg);
+}
+
+.g-deduction { background: #fff0ec; }
+.g-company { background: #edf3f8; }
+.g-extra { background: #f1edfb; }
+
+.cmt-dot {
+  margin-left: 8rpx;
+  color: #d88655;
+  font-size: 20rpx;
+}
+
+.ai-fab {
+  position: fixed;
+  right: 30rpx;
+  bottom: calc(118rpx + env(safe-area-inset-bottom));
+  z-index: 999;
+  width: 96rpx;
+  height: 96rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1rpx solid rgba(255, 255, 255, 0.16);
+  border-radius: 50%;
+  color: #ffffff;
+  background: #242437;
+  box-shadow: 0 16rpx 34rpx rgba(36, 36, 55, 0.22);
+  font-family: "DIN Alternate", "Arial Narrow", sans-serif;
+  font-size: 25rpx;
+  font-weight: 700;
+  letter-spacing: 1rpx;
+}
+
+/* 统一旧页面的视觉令牌，逐步消除历史蓝色主题。 */
+.chat-page { background: #f4f3f0 !important; }
+.chat-head,
+.user-card,
+.head-card { background: #242437 !important; }
+
+.bubble.mine,
+.send-btn,
+.btn-add,
+.btn-search,
+.btn.primary,
+.pin-btn,
+.act.edit,
+.qi-blue,
+.gesture-dot.active { background: #6658cc !important; }
+
+.qi-purple { background: #8a70a8 !important; }
+.qi-green,
+.check.checked { border-color: #69a389 !important; background: #69a389 !important; }
+.qi-orange { background: #d99a5e !important; }
+
+.chip.active,
+.tag-chip.active,
+.quick.active,
+.st-chip.active,
+.record-grade,
+.art-cat,
+.act-tag,
+.sugg,
+.r-copy,
+.unlock-btn { color: #6658cc !important; background: #efedff !important; }
+
+.art-share,
+.field-add,
+.kv.strong,
+.comment-field,
+.group-toggle,
+.todo-foot,
+.video-item { color: #6658cc !important; }
+
+.search-input,
+.chat-input,
+.pwd-input,
+.ipt,
+.pin-input,
+.picker,
+.md-ipt { background: #f7f6f8 !important; }
+
+.sheet,
+.pin-sheet { border-radius: 28rpx 28rpx 0 0 !important; }
+
+.unlock-page { background: #242437 !important; }
+.face-btn { color: #242437 !important; }
+.gbtn.primary { color: #242437 !important; }

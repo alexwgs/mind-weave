@@ -1,0 +1,574 @@
+/* ============================================================================
+   知识花园：阅读器 / 公开博客 / 文章库 / 编辑器的共享样式
+   （此前缺失，文章正文因此完全失去排版，这里按现有设计语汇补齐）
+   ========================================================================= */
+
+/* ------------------------------------------------------------- 阅读器 --- */
+.knowledge-reader { max-width: 1180px; margin: 0 auto; padding: 0 20px; }
+
+.knowledge-reader-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 0;
+}
+
+.knowledge-reading-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 34px;
+  align-items: start;
+  padding-bottom: 60px;
+}
+.knowledge-reading-layout.has-toc { grid-template-columns: minmax(0, 1fr) 224px; }
+
+.knowledge-reading-paper {
+  background: var(--app-surface, #fff);
+  border: 1px solid var(--app-border, #e8eaf1);
+  border-radius: var(--app-radius, 18px);
+  box-shadow: var(--app-shadow, 0 4px 24px #2b315006);
+  padding: clamp(28px, 4vw, 54px);
+  min-width: 0;
+}
+
+.knowledge-eyebrow {
+  display: inline-block;
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--app-muted, #747d91);
+}
+
+.knowledge-reading-paper h1 {
+  font-family: var(--app-display);
+  font-size: clamp(25px, 3vw, 36px);
+  line-height: 1.42;
+  letter-spacing: -.6px;
+  margin: 13px 0 0;
+  color: var(--app-ink, #25304a);
+}
+
+.knowledge-reading-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  margin-top: 16px;
+  font-size: 12px;
+  color: var(--app-muted, #747d91);
+}
+.knowledge-reading-meta span { display: inline-flex; align-items: center; gap: 6px; }
+
+.knowledge-reading-tags { margin-top: 16px; }
+
+/* 未开启分享：只给预览，正文到此为止 */
+.knowledge-locked-chip {
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--app-peach, #fff0e9);
+  color: #b46b4e;
+  font-size: 11px;
+}
+.knowledge-locked {
+  margin-top: 30px;
+  padding: 30px 26px;
+  text-align: center;
+  border: 1px dashed var(--app-border, #e8eaf1);
+  border-radius: 4px 16px 16px 4px;
+  background: var(--app-bg, #f6f7fb);
+}
+.knowledge-locked-mark { display: block; font-size: 26px; line-height: 1; }
+.knowledge-locked h2 {
+  font-family: var(--app-display);
+  font-size: 17px;
+  margin: 13px 0 8px;
+  color: var(--app-ink, #25304a);
+}
+.knowledge-locked p { margin: 0; font-size: 12.5px; line-height: 1.9; color: var(--app-muted, #747d91); }
+
+.knowledge-reading-summary {
+  margin: 26px 0 0;
+  padding: 18px 22px;
+  border-left: 3px solid var(--app-primary, #6554d9);
+  background: var(--app-lilac, #eee9ff);
+  border-radius: 4px 12px 12px 4px;
+  font-size: 14px;
+  line-height: 1.95;
+  color: var(--semi-color-text-1, #566078);
+}
+
+/* 目录：跟随阅读高亮 */
+.knowledge-toc {
+  position: sticky;
+  top: 92px;
+  align-self: start;
+  background: var(--app-surface, #fff);
+  border: 1px solid var(--app-border, #e8eaf1);
+  border-radius: var(--app-radius, 18px);
+  padding: 20px 18px;
+  box-shadow: var(--app-shadow, 0 4px 24px #2b315006);
+  max-height: calc(100dvh - 130px);
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.knowledge-toc nav { display: flex; flex-direction: column; gap: 2px; margin-top: 12px; }
+.knowledge-toc nav button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  color: var(--semi-color-text-1, #566078);
+  font-size: 12px;
+  line-height: 1.6;
+  padding: 7px 10px;
+  border-radius: 8px;
+  transition: background .18s, color .18s;
+}
+.knowledge-toc nav button:hover { background: var(--app-bg, #f6f7fb); color: var(--app-ink, #25304a); }
+.knowledge-toc nav button.is-active { background: var(--app-lilac, #eee9ff); color: var(--app-primary, #6554d9); font-weight: 500; }
+.knowledge-toc-note { display: block; margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--app-border, #e8eaf1); font-size: 11px; color: var(--app-muted, #747d91); }
+
+/* ------------------------------------------------------------- 正文排版 --- */
+.knowledge-prose {
+  font-size: 15px;
+  line-height: 2;
+  color: var(--semi-color-text-1, #3f4a63);
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
+}
+.knowledge-reading-paper .knowledge-prose { margin-top: 28px; }
+
+.knowledge-prose > *:first-child { margin-top: 0; }
+.knowledge-prose > *:last-child { margin-bottom: 0; }
+
+.knowledge-prose h1,
+.knowledge-prose h2,
+.knowledge-prose h3,
+.knowledge-prose h4,
+.knowledge-prose h5,
+.knowledge-prose h6 {
+  font-family: var(--app-display);
+  color: var(--app-ink, #25304a);
+  line-height: 1.5;
+  letter-spacing: -.3px;
+  margin: 2em 0 .8em;
+  scroll-margin-top: 90px;
+}
+.knowledge-prose h1 { font-size: 26px; }
+.knowledge-prose h2 { font-size: 22px; padding-bottom: .4em; border-bottom: 1px solid var(--app-border, #e8eaf1); }
+.knowledge-prose h3 { font-size: 18px; }
+.knowledge-prose h4 { font-size: 16px; }
+.knowledge-prose h5,
+.knowledge-prose h6 { font-size: 14px; color: var(--semi-color-text-1, #566078); }
+
+.knowledge-prose p { margin: 1.15em 0; }
+.knowledge-prose strong { color: var(--app-ink, #25304a); font-weight: 600; }
+.knowledge-prose em { font-style: italic; }
+.knowledge-prose del { color: var(--app-muted, #747d91); }
+
+.knowledge-prose a { color: var(--app-primary, #6554d9); text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+.knowledge-prose a:hover { text-decoration-thickness: 2px; }
+
+.knowledge-prose ul,
+.knowledge-prose ol { margin: 1.15em 0; padding-left: 1.55em; }
+.knowledge-prose li { margin: .5em 0; }
+.knowledge-prose li::marker { color: var(--app-muted, #747d91); }
+.knowledge-prose li > ul,
+.knowledge-prose li > ol { margin: .4em 0; }
+
+.knowledge-prose .knowledge-task-item { list-style: none; margin-left: -1.55em; display: flex; gap: 9px; align-items: flex-start; }
+.knowledge-prose .knowledge-task-item > span { flex-shrink: 0; color: var(--app-primary, #6554d9); font-size: 15px; line-height: 2; }
+
+.knowledge-prose blockquote {
+  margin: 1.5em 0;
+  padding: 12px 20px;
+  border-left: 3px solid #b6a7e9;
+  background: var(--app-bg, #f6f7fb);
+  border-radius: 4px 12px 12px 4px;
+  color: var(--semi-color-text-1, #566078);
+}
+.knowledge-prose blockquote p { margin: .45em 0; }
+
+.knowledge-prose code {
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+  font-size: .88em;
+  background: var(--app-bg, #f6f7fb);
+  border: 1px solid var(--app-border, #e8eaf1);
+  border-radius: 5px;
+  padding: .14em .42em;
+  color: #5543c5;
+}
+.knowledge-prose pre {
+  margin: 1.5em 0;
+  padding: 16px 18px;
+  border-radius: 12px;
+  overflow-x: auto;
+  background: #25304a;
+  color: #f6f7fb;
+  line-height: 1.75;
+}
+.knowledge-prose pre code { background: transparent; border: 0; padding: 0; color: inherit; font-size: 13px; }
+
+.knowledge-prose table {
+  width: 100%;
+  margin: 1.5em 0;
+  border-collapse: collapse;
+  font-size: 13.5px;
+  display: block;
+  overflow-x: auto;
+}
+.knowledge-prose th,
+.knowledge-prose td { border: 1px solid var(--app-border, #e8eaf1); padding: 10px 13px; text-align: left; vertical-align: top; }
+.knowledge-prose th { background: var(--app-bg, #f6f7fb); font-weight: 500; color: var(--app-ink, #25304a); }
+.knowledge-prose tbody tr:nth-child(even) { background: #fafbfe; }
+
+.knowledge-prose img,
+.knowledge-prose video { max-width: 100%; height: auto; border-radius: 10px; display: block; margin: 1.5em auto; }
+
+.knowledge-prose hr { margin: 2.4em 0; border: 0; border-top: 1px dashed var(--app-border, #e8eaf1); }
+
+/* 附件下载卡片：PDF / Word / Excel / 压缩包等任意类型 */
+.knowledge-file {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 100%;
+  margin: .35em 0;
+  padding: 11px 16px;
+  border: 1px solid var(--app-border, #e8eaf1);
+  border-radius: 10px;
+  background: var(--app-bg, #f6f7fb);
+  text-decoration: none !important;
+  transition: border-color .2s ease, transform .2s ease, box-shadow .2s ease;
+}
+.knowledge-file:hover {
+  border-color: var(--app-primary, #6554d9);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px #2b31500f;
+}
+.knowledge-file-icon { flex: none; font-size: 17px; line-height: 1; }
+.knowledge-file-name {
+  min-width: 0;
+  font-size: 13.5px;
+  color: var(--app-ink, #25304a);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.knowledge-file-size { flex: none; font-size: 11px; color: var(--app-muted, #747d91); }
+.knowledge-file-action {
+  flex: none;
+  font-size: 11px;
+  color: var(--app-primary, #6554d9);
+  border-left: 1px solid var(--app-border, #e8eaf1);
+  padding-left: 10px;
+}
+/* 编辑器的分栏预览很窄，窄到一定程度就藏掉"下载"二字，只留图标和文件名 */
+@media (max-width: 1180px) {
+  .knowledge-file-action { display: none; }
+}
+
+/* 公开博客：正文落在深色菌床上，重新给一套对比度合适的颜色 */
+.knowledge-public { background: var(--my-bed, #0b1210); min-height: 100dvh; padding-bottom: 40px; }
+.knowledge-public .knowledge-reading-paper {
+  background: linear-gradient(160deg, #16211d 0%, #101917 100%);
+  border-color: rgba(143, 179, 161, .16);
+  box-shadow: 0 30px 70px -34px rgba(0, 0, 0, .9);
+}
+.knowledge-public .knowledge-reading-paper h1 { color: var(--my-ink, #e8f4ec); }
+.knowledge-public .knowledge-eyebrow { color: var(--my-glow, #4fd39a); }
+.knowledge-public .knowledge-reading-meta { color: var(--my-muted, #8fa79b); }
+.knowledge-public .knowledge-reading-summary {
+  background: rgba(79, 211, 154, .08);
+  border-left-color: var(--my-glow, #4fd39a);
+  color: #b6cdc1;
+}
+.knowledge-public .knowledge-prose { color: #c2d6cb; }
+.knowledge-public .knowledge-prose h1,
+.knowledge-public .knowledge-prose h2,
+.knowledge-public .knowledge-prose h3,
+.knowledge-public .knowledge-prose h4,
+.knowledge-public .knowledge-prose strong { color: var(--my-spore, #d9ffe8); }
+.knowledge-public .knowledge-prose h2 { border-bottom-color: rgba(143, 179, 161, .18); }
+.knowledge-public .knowledge-prose a { color: var(--my-glow, #4fd39a); }
+.knowledge-public .knowledge-prose code {
+  background: rgba(79, 211, 154, .1);
+  border-color: rgba(143, 179, 161, .2);
+  color: var(--my-spore, #d9ffe8);
+}
+.knowledge-public .knowledge-prose pre { background: #060c0a; border: 1px solid rgba(143, 179, 161, .16); }
+/* 长篇笔记里常有整段引用。Semi 的排版样式会在运行时注入引用块底色，
+   优先级压过普通选择器，所以这里用 !important 把深色主题的对比度锁死。 */
+.knowledge-public .knowledge-reading-paper .knowledge-prose blockquote {
+  background: #0d1512 !important;
+  border: 1px solid rgba(143, 179, 161, .18);
+  border-left: 3px solid var(--my-glow, #4fd39a);
+  color: #b6cdc1 !important;
+}
+.knowledge-public .knowledge-reading-paper .knowledge-prose blockquote p { margin: .5em 0; }
+.knowledge-public .knowledge-prose th,
+.knowledge-public .knowledge-prose td { border-color: rgba(143, 179, 161, .2); }
+.knowledge-public .knowledge-prose th { background: rgba(143, 179, 161, .1); color: var(--my-spore, #d9ffe8); }
+.knowledge-public .knowledge-prose tbody tr:nth-child(even) { background: rgba(143, 179, 161, .04); }
+.knowledge-public .knowledge-prose hr { border-top-color: rgba(143, 179, 161, .18); }
+.knowledge-public .knowledge-prose .knowledge-file {
+  background: rgba(143, 179, 161, .08);
+  border-color: rgba(143, 179, 161, .24);
+}
+.knowledge-public .knowledge-prose .knowledge-file:hover { border-color: var(--my-glow, #4fd39a); }
+.knowledge-public .knowledge-prose .knowledge-file-name { color: var(--my-spore, #d9ffe8); }
+.knowledge-public .knowledge-prose .knowledge-file-size { color: var(--my-muted, #8fa79b); }
+.knowledge-public .knowledge-prose .knowledge-file-action {
+  color: var(--my-glow, #4fd39a);
+  border-left-color: rgba(143, 179, 161, .24);
+}
+.knowledge-public .knowledge-toc {
+  background: rgba(18, 28, 25, .7);
+  border-color: rgba(143, 179, 161, .16);
+}
+.knowledge-public .knowledge-toc nav button { color: var(--my-muted, #8fa79b); }
+.knowledge-public .knowledge-toc nav button:hover { background: rgba(143, 179, 161, .1); color: var(--my-spore, #d9ffe8); }
+.knowledge-public .knowledge-toc nav button.is-active { background: rgba(79, 211, 154, .14); color: var(--my-glow, #4fd39a); }
+.knowledge-public .knowledge-toc-note { border-top-color: rgba(143, 179, 161, .16); color: var(--my-muted, #8fa79b); }
+
+.knowledge-public .knowledge-locked-chip {
+  background: rgba(217, 160, 106, .16);
+  color: var(--my-tan, #d9a06a);
+}
+.knowledge-public .knowledge-locked {
+  background: rgba(143, 179, 161, .06);
+  border-color: rgba(143, 179, 161, .28);
+}
+.knowledge-public .knowledge-locked h2 { color: var(--my-spore, #d9ffe8); }
+.knowledge-public .knowledge-locked p { color: var(--my-muted, #8fa79b); }
+
+@media (max-width: 991px) {
+  .knowledge-reading-layout.has-toc { grid-template-columns: minmax(0, 1fr); }
+  .knowledge-toc { position: static; max-height: none; order: -1; }
+}
+@media (max-width: 700px) {
+  .knowledge-reader { padding: 0 14px; }
+  .knowledge-reading-paper { padding: 22px 18px; }
+  .knowledge-prose { font-size: 14.5px; line-height: 1.95; }
+  .knowledge-reader-tools { flex-direction: column; align-items: stretch; }
+}
+
+/* --------------------------------------------- 文章库（知识花园后台） --- */
+.knowledge-workspace { padding-bottom: 20px; }
+.knowledge-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
+.knowledge-heading h1 { font-family: var(--app-display); font-size: 27px; letter-spacing: -.6px; margin: 9px 0; }
+.knowledge-heading p { margin: 0; font-size: 13px; color: var(--app-muted, #747d91); }
+.knowledge-heading-spark { color: var(--app-accent, #f18b75); margin-left: 10px; }
+
+.knowledge-library { display: grid; grid-template-columns: 236px minmax(0, 1fr); gap: 22px; align-items: start; }
+.knowledge-sidebar {
+  background: var(--app-surface, #fff);
+  border: 1px solid var(--app-border, #e8eaf1);
+  border-radius: var(--app-radius, 18px);
+  padding: 20px 18px;
+  box-shadow: var(--app-shadow, 0 4px 24px #2b315006);
+  position: sticky;
+  top: 92px;
+}
+.knowledge-sidebar-title { display: flex; align-items: center; justify-content: space-between; }
+.knowledge-sidebar h2 { font-family: var(--app-display); font-size: 15px; margin: 0 0 12px; }
+.knowledge-sidebar-note { font-size: 11px; line-height: 1.8; color: var(--app-muted, #747d91); margin: 10px 0 0; }
+.knowledge-sidebar-tags { margin-top: 22px; }
+
+.knowledge-all-category {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: var(--semi-color-text-1, #566078);
+  font-size: 13px;
+  text-align: left;
+  padding: 9px 12px;
+  border-radius: 9px;
+  transition: background .18s, color .18s;
+}
+.knowledge-all-category:hover { background: var(--app-bg, #f6f7fb); }
+.knowledge-all-category.is-active { background: var(--app-lilac, #eee9ff); color: var(--app-primary, #6554d9); font-weight: 500; }
+
+.knowledge-category { display: flex; align-items: center; gap: 4px; }
+.knowledge-category-label {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: var(--semi-color-text-1, #566078);
+  font-size: 13px;
+  text-align: left;
+  padding: 8px 12px;
+  border-radius: 9px;
+  transition: background .18s, color .18s;
+}
+.knowledge-category-label:hover { background: var(--app-bg, #f6f7fb); }
+.knowledge-category.is-active .knowledge-category-label { background: var(--app-lilac, #eee9ff); color: var(--app-primary, #6554d9); font-weight: 500; }
+.knowledge-category-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--app-primary, #6554d9); opacity: .55; flex-shrink: 0; }
+.knowledge-category-actions { display: flex; align-items: center; flex-shrink: 0; }
+
+.knowledge-tag-links { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 9px; }
+.knowledge-tag-links button {
+  border: 0;
+  background: var(--app-bg, #f6f7fb);
+  color: var(--semi-color-text-1, #566078);
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  transition: background .18s, color .18s;
+}
+.knowledge-tag-links button:hover { background: var(--app-lilac, #eee9ff); color: var(--app-primary, #6554d9); }
+.knowledge-tag-links button.is-active { background: var(--app-primary, #6554d9); color: #fff; }
+
+.knowledge-shelf-note {
+  margin-top: 24px;
+  padding: 16px;
+  border-radius: 12px;
+  background: var(--app-peach, #fff0e9);
+  color: #a9684f;
+  font-size: 11px;
+  line-height: 1.9;
+}
+.knowledge-shelf-note p { margin: 7px 0 0; }
+
+.knowledge-library-main { min-width: 0; }
+.knowledge-library-title { display: flex; align-items: flex-end; justify-content: space-between; gap: 14px; margin-bottom: 16px; }
+.knowledge-library-title h2 { font-family: var(--app-display); font-size: 19px; margin: 0 0 7px; letter-spacing: -.3px; }
+.knowledge-muted { font-size: 12px; color: var(--app-muted, #747d91); }
+.knowledge-view-switch { display: flex; gap: 3px; padding: 3px; border-radius: 9px; background: var(--app-bg, #f6f7fb); }
+.knowledge-view-switch button {
+  border: 0;
+  background: transparent;
+  color: var(--app-muted, #747d91);
+  font-size: 12px;
+  padding: 6px 14px;
+  border-radius: 7px;
+  transition: background .18s, color .18s;
+}
+.knowledge-view-switch button[aria-pressed='true'] { background: var(--app-surface, #fff); color: var(--app-ink, #25304a); box-shadow: 0 1px 4px #2b31500f; }
+
+.knowledge-filters { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 16px; }
+.knowledge-search { flex: 1; min-width: 200px; max-width: 380px; }
+.knowledge-active-filters {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+  padding: 10px 15px;
+  border-radius: 10px;
+  background: var(--app-lilac, #eee9ff);
+  font-size: 11px;
+  color: #6554a9;
+}
+.knowledge-loading { display: grid; place-items: center; padding: 80px 0; }
+
+.knowledge-card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(268px, 1fr)); gap: 18px; }
+.knowledge-card {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  padding: 22px;
+  border-radius: var(--app-radius, 18px);
+  border: 1px solid transparent;
+  transition: transform .18s, box-shadow .18s;
+}
+.knowledge-card:hover { transform: translateY(-3px); box-shadow: 0 14px 30px #2b31500f; }
+.knowledge-card-tone-0 { background: var(--app-lilac, #eee9ff); }
+.knowledge-card-tone-1 { background: var(--app-mint, #d8f1e5); }
+.knowledge-card-tone-2 { background: var(--app-peach, #fff0e9); }
+.knowledge-card-top { display: flex; align-items: center; justify-content: space-between; gap: 9px; }
+.knowledge-card-category { font-size: 10px; letter-spacing: .5px; color: var(--app-muted, #747d91); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.knowledge-pin { font-size: 10px; padding: 2px 9px; border-radius: 999px; background: #ffffff8c; color: #b46b4e; }
+.knowledge-card-title {
+  border: 0;
+  background: transparent;
+  text-align: left;
+  font-family: var(--app-display);
+  font-size: 16px;
+  line-height: 1.55;
+  color: var(--app-ink, #25304a);
+  padding: 0;
+}
+.knowledge-card-title:hover { color: var(--app-primary, #6554d9); }
+.knowledge-card-summary {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.85;
+  color: var(--semi-color-text-1, #566078);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  flex: 1;
+}
+.knowledge-card-status { display: flex; flex-wrap: wrap; gap: 6px; }
+.knowledge-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding-top: 11px;
+  border-top: 1px solid #ffffff9c;
+  font-size: 10px;
+  color: var(--app-muted, #747d91);
+}
+
+.knowledge-table {
+  background: var(--app-surface, #fff);
+  border: 1px solid var(--app-border, #e8eaf1);
+  border-radius: var(--app-radius, 18px);
+  box-shadow: var(--app-shadow, 0 4px 24px #2b315006);
+  overflow: hidden;
+}
+.knowledge-text-link { border: 0; background: transparent; padding: 0; text-align: left; font-size: 13px; font-weight: 500; color: var(--app-ink, #25304a); }
+.knowledge-text-link:hover { color: var(--app-primary, #6554d9); }
+.knowledge-row-summary { font-size: 11px; color: var(--app-muted, #747d91); margin-top: 5px; line-height: 1.7; }
+.knowledge-pagination { display: flex; justify-content: flex-end; margin-top: 20px; }
+.knowledge-share-form { display: flex; flex-direction: column; gap: 12px; }
+.knowledge-share-form p { margin: 0; font-size: 12px; color: var(--app-muted, #747d91); line-height: 1.8; }
+
+.knowledge-shelf { min-width: 0; }
+
+@media (max-width: 991px) {
+  .knowledge-library { grid-template-columns: minmax(0, 1fr); }
+  .knowledge-sidebar { position: static; }
+}
+@media (max-width: 700px) {
+  .knowledge-heading h1 { font-size: 23px; }
+  .knowledge-card-grid { grid-template-columns: 1fr; }
+}
+
+/* --------------------------------------------------------------- 编辑器 --- */
+.knowledge-editor { display: flex; flex-direction: column; gap: 18px; padding-bottom: 20px; }
+.knowledge-editor-status { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 11px; color: var(--app-muted, #747d91); }
+.knowledge-recovery { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+.knowledge-recovery strong { font-size: 12px; }
+.knowledge-recovery p { margin: 6px 0 0; font-size: 11px; line-height: 1.8; }
+
+.knowledge-editor-layout { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 18px; align-items: start; }
+.knowledge-editor-main {
+  background: var(--app-surface, #fff);
+  border: 1px solid var(--app-border, #e8eaf1);
+  border-radius: var(--app-radius, 18px);
+  box-shadow: var(--app-shadow, 0 4px 24px #2b315006);
+  padding: 18px 20px 20px;
+  min-width: 0;
+}
+.knowledge-editor-utilities { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; font-size: 11px; color: var(--app-muted, #747d91); }
+.knowledge-editor-settings { position: sticky; top: 92px; }
+.knowledge-editor-settings .semi-card { border-radius: var(--app-radius, 18px); border-color: var(--app-border, #e8eaf1); box-shadow: var(--app-shadow, 0 4px 24px #2b315006); }
+
+@media (max-width: 1200px) {
+  .knowledge-editor-layout { grid-template-columns: minmax(0, 1fr); }
+  .knowledge-editor-settings { position: static; }
+}
