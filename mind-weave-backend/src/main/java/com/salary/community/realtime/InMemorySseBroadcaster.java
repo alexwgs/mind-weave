@@ -1,6 +1,7 @@
 package com.salary.community.realtime;
 
 import com.salary.community.entity.ChatMessage;
+import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -150,5 +151,12 @@ public class InMemorySseBroadcaster implements RealtimeBroadcaster {
     public int connectionCount(Long roomId) {
         Map<String, SseEmitter> room = subscriptions.get(roomId);
         return room == null ? 0 : room.size();
+    }
+
+    /** 停机时主动关闭所有长连接，让浏览器立刻知道要重连，而不是一直挂着 */
+    @PreDestroy
+    void shutdown() {
+        subscriptions.keySet().forEach(this::complete);
+        cleanup.shutdownNow();
     }
 }
